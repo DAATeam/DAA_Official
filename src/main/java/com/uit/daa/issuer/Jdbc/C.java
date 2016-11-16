@@ -30,7 +30,7 @@ public class C {
     public static String CL_NAME = "user_name";
     public static String CL_JOB = "user_job";
     public static String CL_SERNAME = "service_name";
-    public static String CL_PERMISSION = "service_permissions";
+    public static String CL_PERMISSION = "service_permission";
     public static String CL_FIELD = "field";
     public static String CL_CODE = "code";
     public static String CL_LEVEL = "level";

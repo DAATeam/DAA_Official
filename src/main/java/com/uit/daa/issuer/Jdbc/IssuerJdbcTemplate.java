@@ -71,6 +71,19 @@ public class IssuerJdbcTemplate {
         member.addColumn(new Column().setToDefaultTimeStampWithName(C.CL_CREATETIME));
         jdbcTemplate.execute(member.getCreateTableSql());
         }
+        
+         rs = metaData.getTables(null, null,C.TB_APP,null);
+        if(rs.next() == false){
+        
+        Table app = new Table(C.TB_APP);
+        app.addColumn(new Column(C.CL_APPID,Column.DataTypeEnum.BIGINT,null).setToAutoIncrement()
+        .setToPrimaryKey().setToNotNull());
+        app.addColumn(new Column(C.CL_DEVICEID, Column.DataTypeEnum.TEXT,null));
+        app.addColumn(new Column(C.CL_M_ID,Column.DataTypeEnum.BIGINT, null));
+        app.addColumn(new Column().setToDefaultTimeStampWithName(C.CL_CREATETIME));
+        jdbcTemplate.execute(app.getCreateTableSql());
+        }
+        
                
         rs = metaData.getTables(null, null,C.TB_M_TYPE,null);
         if(!rs.next()){
@@ -141,7 +154,7 @@ public class IssuerJdbcTemplate {
         jdbcTemplate.execute(nonce.getCreateTableSql());
         }
              
-        //addExampleData();
+       addExampleData();
 
         
         
@@ -167,14 +180,14 @@ public class IssuerJdbcTemplate {
             
         }
         //Member
-        Member m = new Member("LoveCat",curve, 1);
-        m.save(jdbcTemplate);
+        //Member m = new Member("LoveCat",curve, 1);
+        //m.save(jdbcTemplate);
         //App
-        App a = new App(m,"ASUS Zenfone");
-        a.save(jdbcTemplate);
+        //App a = new App(m,"ASUS Zenfone");
+        //a.save(jdbcTemplate);
         //User
-        User u = new User(m, "Thanh Uyen","Manager");
-        u.save(jdbcTemplate);
+        //User u = new User(m, "Thanh Uyen","Manager");
+        //u.save(jdbcTemplate);
         
         
         

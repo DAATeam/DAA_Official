@@ -9,8 +9,12 @@ import com.sun.javafx.collections.MappingChange.Map;
 import com.uit.daa.issuer.Controllers.Validator.Jm1Data;
 import com.uit.daa.issuer.Controllers.Validator.MemberData;
 import com.uit.daa.issuer.Controllers.Validator.SigData;
+import com.uit.daa.issuer.Controllers.Validator.addAppData;
+import com.uit.daa.issuer.Controllers.Validator.addServiceData;
+import com.uit.daa.issuer.Controllers.Validator.addUserData;
 import com.uit.daa.issuer.Jdbc.C;
 import com.uit.daa.issuer.Jdbc.IssuerJdbcTemplate;
+import com.uit.daa.issuer.Models.App;
 import com.uit.daa.issuer.Models.Authenticator;
 import com.uit.daa.issuer.Models.Issuer;
 import com.uit.daa.issuer.Models.Member;
@@ -132,16 +136,16 @@ public class IssuerController {
              @ModelAttribute("Jm1Data") @Valid Jm1Data jm1, BindingResult result) throws SQLException, NoSuchAlgorithmException, JSONException, IOException{
          prepare();
          JSONObject json = new JSONObject();
-         if(result.hasErrors()){
+         if(result.hasErrors() || jm1.getJoinMessage1() == null){
              json.put(STATUS,ERROR);
              json.put(MESSAGE,"Invalid input");
          }
          else{
              
-             Nonce nonce = checkNonce(jm1.getJm1().nonce);
+             Nonce nonce = checkNonce(jm1.getJoinMessage1().nonce);
              boolean valid = nonce == null ? false : true;
              if(valid){
-             Issuer.JoinMessage2 jm2 = issuer.EcDaaIssuerJoin(jm1.getJm1());
+             Issuer.JoinMessage2 jm2 = issuer.EcDaaIssuerJoin(jm1.getJoinMessage1());
              if(jm2 != null){
                  json.put(STATUS,OK);
                  json.put(MESSAGE, "Certificated");
@@ -283,4 +287,68 @@ public class IssuerController {
                 DirtyWork.hexStringToByteArray(sig), message.getBytes(), curve);
         return ver.verify(signature,CERT_BASENAME , issuer.pk, null);
     }
+    
+    @RequestMapping(value="/addUser", method = RequestMethod.POST)
+    public void addUser(HttpServletResponse res,
+            @ModelAttribute("addUserData") @Valid addUserData data,
+            BindingResult result) throws JSONException, SQLException, IOException, NoSuchAlgorithmException, IOException{
+        JSONObject json = new JSONObject();
+        prepare();
+        if(result.hasErrors()){
+            json.put(STATUS, ERROR);
+            json.put(MESSAGE, "Invalid input");
+        }
+        else{
+            Member m = data.createNewMember(ijt.jdbcTemplate);
+            data.createNewUser(ijt.jdbcTemplate,m);
+            json.put(STATUS, OK);
+            json.put(MESSAGE,"successful" );
+        }
+        res.getWriter().println(json.toString());
+    }
+    @RequestMapping(value="/addService", method = RequestMethod.POST)
+    public void addService(HttpServletResponse res,
+            @ModelAttribute("addServiceData") @Valid addServiceData data,
+            BindingResult result) throws JSONException, SQLException, IOException, NoSuchAlgorithmException{
+        JSONObject json = new JSONObject();
+        prepare();
+        if(result.hasErrors()){
+            json.put(STATUS, ERROR);
+            json.put(MESSAGE, "Invalid input");
+        }
+        else{
+            data.createNewMember(ijt.jdbcTemplate);
+            data.createNewService(ijt.jdbcTemplate);
+            json.put(STATUS, OK);
+            json.put(MESSAGE,"successful" );
+        }
+        res.getWriter().println(json.toString());
+    }
+    @RequestMapping(value="/addApp", method = RequestMethod.POST)
+    public void addApp(HttpServletResponse res,
+            @ModelAttribute("addAppData") @Valid addAppData data,
+            BindingResult result) throws JSONException, SQLException, IOException, NoSuchAlgorithmException{
+        JSONObject json = new JSONObject();
+        prepare();
+        if(result.hasErrors()){
+            json.put(STATUS, ERROR);
+            json.put(MESSAGE, "Invalid input");
+        }
+        else{
+            
+            App app = data.createNewApp(ijt.jdbcTemplate);
+            if(app != null){
+            json.put(STATUS, OK);
+            json.put(MESSAGE,"successful" );
+            }
+            else{
+                 json.put(STATUS, ERROR);
+            json.put(MESSAGE, "Wrong identity");
+            }
+        }
+        res.getWriter().println(json.toString());
+    }
+    
+    
+    
 }
