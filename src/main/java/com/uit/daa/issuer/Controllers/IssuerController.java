@@ -20,9 +20,11 @@ import com.uit.daa.issuer.Models.Issuer;
 import com.uit.daa.issuer.Models.Member;
 import com.uit.daa.issuer.Models.MemberType;
 import com.uit.daa.issuer.Models.Nonce;
+import com.uit.daa.issuer.Models.Service;
 import com.uit.daa.issuer.Models.User;
 import com.uit.daa.issuer.Models.Verifier;
 import com.uit.daa.issuer.Models.crypto.BNCurve;
+import iaik.security.ec.math.curve.ECPoint;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
@@ -42,6 +44,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  *
@@ -275,8 +278,8 @@ public class IssuerController {
         BigInteger sk = issuer.getSk().x;
         BNCurve curve = BNCurve.createBNCurveFromName(Config.curveName);
         Authenticator auth = new Authenticator(curve,issuer.pk,sk);
-        
-        String basename = "certificate";
+        auth.EcDaaJoin2(issuer.EcDaaIssuerJoin(auth.EcDaaJoin1(issuer.GetNonce())));
+        String basename = CERT_BASENAME;
         Authenticator.EcDaaSignature cert = auth.EcDaaSign(basename, sig);
         return DirtyWork.bytesToHex(cert.encode(curve));
     }
@@ -348,6 +351,54 @@ public class IssuerController {
         }
         res.getWriter().println(json.toString());
     }
+    @RequestMapping("/test")
+    public ModelAndView test() throws SQLException, NoSuchAlgorithmException{
+        prepare();
+        ModelAndView mav = new ModelAndView("test");
+        Map<String, String> map;
+        BNCurve curve  = BNCurve.createBNCurveFromName(Config.curveName);
+        Member muser = new Member("LovelyGirl",curve,MemberType.USER_TYPE);
+        Member mservice = new Member("theCoffeeHouse", BNCurve.createBNCurveFromName(Config.curveName), MemberType.SERVICE_TYPE);
+        User user = new User(muser,"Thanh Uyen","Manager");
+        Service  service= new Service(mservice,"TheCofeeHouse","user_job");
+        Authenticator user_auth = new Authenticator(curve, issuer.pk);
+        Authenticator service_auth = new Authenticator(curve, issuer.pk);
+        Authenticator issuer_auth = new Authenticator(curve, issuer.pk,issuer.getSk().x);
+        user_auth.EcDaaJoin2(issuer.EcDaaIssuerJoin(user_auth.EcDaaJoin1(issuer.GetNonce())));
+        service_auth.EcDaaJoin2(issuer.EcDaaIssuerJoin(service_auth.EcDaaJoin1(issuer.GetNonce())));
+        issuer_auth.EcDaaJoin2(issuer.EcDaaIssuerJoin(issuer_auth.EcDaaJoin1(issuer.GetNonce())));
+        Authenticator.EcDaaSignature permission_sig = service_auth.EcDaaSign(
+                CERT_BASENAME, service.service_permission);
+        String permission_cert = createCertificate(issuer, 
+                DirtyWork.bytesToHex(permission_sig.encode(curve)));
+        Authenticator.EcDaaSignature job_sig = user_auth.EcDaaSign(CERT_BASENAME,user.job);
+        String job_cert = createCertificate(issuer, 
+                DirtyWork.bytesToHex(job_sig.encode(curve)));
+        
+        Verifier  v = new Verifier(curve);
+        boolean valid_ser = true;
+        boolean valid_user = true;
+        valid_ser &= verifyEcDaaSig(issuer,DirtyWork.bytesToHex(permission_sig.encode(curve)),service.service_permission);
+        valid_ser &= verifyEcDaaSig(issuer,permission_cert,DirtyWork.bytesToHex(permission_sig.encode(curve)));
+        valid_user &= verifyEcDaaSig(issuer,DirtyWork.bytesToHex(job_sig.encode(curve)),user.job);
+        valid_user &= verifyEcDaaSig(issuer,job_cert,DirtyWork.bytesToHex(job_sig.encode(curve)));
+        
+       
+        mav.addObject("verify_service", valid_ser);
+        mav.addObject("verify_user",valid_user);
+        mav.addObject("user_name", user.name);
+        mav.addObject("user_job",user.job);
+        mav.addObject("service_name", service.service_name);
+        mav.addObject("service_permission",service.service_permission);
+        mav.addObject("user_esk",(new BigInteger(user.member.esk)).toString());
+        mav.addObject("user_epk", DirtyWork.bytesToHex(user.member.epk));
+        mav.addObject("service_esk",(new BigInteger(service.member.esk)).toString());
+        mav.addObject("service_epk", DirtyWork.bytesToHex(service.member.epk));
+        mav.addObject("user_job_cert",job_cert);
+        mav.addObject("service_permission_cert",permission_cert);
+        return mav;
+        
+    }   
     
     
     
