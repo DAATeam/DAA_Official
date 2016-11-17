@@ -23,6 +23,8 @@ public class Jm1Data {
     @NotNull
     public String field; //array , delimit by ","
     
+    
+    
     public Jm1Data(String json , String f){
         
         jm1 = json;

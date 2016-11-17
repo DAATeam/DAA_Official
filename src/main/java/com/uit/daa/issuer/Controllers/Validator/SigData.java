@@ -26,6 +26,9 @@ public class SigData {
     @NotNull
     public String nonce;
     
+    @NotNull
+    public String basename;
+    
     public Authenticator.EcDaaSignature getEcDaaSignature(){
         BNCurve curve = BNCurve.createBNCurveFromName(Config.curveName);
         byte[] encoded = DirtyWork.hexStringToByteArray(sig);

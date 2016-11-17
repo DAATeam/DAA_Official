@@ -228,8 +228,14 @@ public class IssuerController {
          String message = json.toString();
          nonce.updateMessage(ijt.jdbcTemplate, message);
      }
-     private void prepareServiceSigData(String[] fields,Member member, Nonce nonce, IssuerJdbcTemplate ijt){
-         
+     private void prepareServiceSigData(String[] fields,Member member, Nonce nonce, IssuerJdbcTemplate ijt) throws SQLException, JSONException{
+        Service service = Service.getFromMemberID(ijt.jdbcTemplate, member.id);
+         JSONObject json = new JSONObject();
+         for(int i = 0; i< fields.length; i++){
+             json.put(fields[i],service.resultSet.getString(fields[i]));
+         }
+         String message = json.toString();
+         nonce.updateMessage(ijt.jdbcTemplate, message); 
      }
      
      /** CLient submit signatures and infos to get certificates
@@ -258,7 +264,7 @@ public class IssuerController {
             else{
                 if(sig.m.equals(nonce.message)){
                     
-                    if(verifyEcDaaSig(issuer, sig.sig, sig.m)){
+                    if(verifyEcDaaSig(issuer, sig.sig, sig.m, sig.basename)){
                         
                     String cert = createCertificate(issuer,sig.sig);
                     json.put(STATUS, OK);
@@ -289,12 +295,12 @@ public class IssuerController {
         Authenticator.EcDaaSignature cert = auth.EcDaaSign(basename, sig);
         return DirtyWork.bytesToHex(cert.encode(curve));
     }
-    private boolean verifyEcDaaSig(Issuer issuer, String sig, String message) throws NoSuchAlgorithmException{
+    private boolean verifyEcDaaSig(Issuer issuer, String sig, String message, String basename) throws NoSuchAlgorithmException{
         BNCurve curve = BNCurve.createBNCurveFromName(Config.curveName);
         Verifier ver  = new Verifier(curve);
         Authenticator.EcDaaSignature signature = new Authenticator.EcDaaSignature(
                 DirtyWork.hexStringToByteArray(sig), message.getBytes(), curve);
-        return ver.verify(signature,CERT_BASENAME , issuer.pk, null);
+        return ver.verify(signature,basename , issuer.pk, null);
     }
     
     @RequestMapping(value="/addUser", method = RequestMethod.POST)
@@ -374,20 +380,20 @@ public class IssuerController {
         service_auth.EcDaaJoin2(issuer.EcDaaIssuerJoin(service_auth.EcDaaJoin1(issuer.GetNonce())));
         issuer_auth.EcDaaJoin2(issuer.EcDaaIssuerJoin(issuer_auth.EcDaaJoin1(issuer.GetNonce())));
         Authenticator.EcDaaSignature permission_sig = service_auth.EcDaaSign(
-                CERT_BASENAME, service.service_permission);
+                C.CL_PERMISSION, service.service_permission);
         String permission_cert = createCertificate(issuer, 
                 DirtyWork.bytesToHex(permission_sig.encode(curve)));
-        Authenticator.EcDaaSignature job_sig = user_auth.EcDaaSign(CERT_BASENAME,user.job);
+        Authenticator.EcDaaSignature job_sig = user_auth.EcDaaSign(C.CL_JOB,user.job);
         String job_cert = createCertificate(issuer, 
                 DirtyWork.bytesToHex(job_sig.encode(curve)));
         
         Verifier  v = new Verifier(curve);
         boolean valid_ser = true;
         boolean valid_user = true;
-        valid_ser &= verifyEcDaaSig(issuer,DirtyWork.bytesToHex(permission_sig.encode(curve)),service.service_permission);
-        valid_ser &= verifyEcDaaSig(issuer,permission_cert,DirtyWork.bytesToHex(permission_sig.encode(curve)));
-        valid_user &= verifyEcDaaSig(issuer,DirtyWork.bytesToHex(job_sig.encode(curve)),user.job);
-        valid_user &= verifyEcDaaSig(issuer,job_cert,DirtyWork.bytesToHex(job_sig.encode(curve)));
+        valid_ser &= verifyEcDaaSig(issuer,DirtyWork.bytesToHex(permission_sig.encode(curve)),service.service_permission,C.CL_PERMISSION);
+        valid_ser &= verifyEcDaaSig(issuer,permission_cert,DirtyWork.bytesToHex(permission_sig.encode(curve)),CERT_BASENAME);
+        valid_user &= verifyEcDaaSig(issuer,DirtyWork.bytesToHex(job_sig.encode(curve)),user.job,C.CL_JOB);
+        valid_user &= verifyEcDaaSig(issuer,job_cert,DirtyWork.bytesToHex(job_sig.encode(curve)), CERT_BASENAME);
         
        
         mav.addObject("verify_service", valid_ser);
