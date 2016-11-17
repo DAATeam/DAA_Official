@@ -23,13 +23,19 @@ import com.uit.daa.issuer.Models.Nonce;
 import com.uit.daa.issuer.Models.Service;
 import com.uit.daa.issuer.Models.User;
 import com.uit.daa.issuer.Models.Verifier;
+import com.uit.daa.issuer.Models.crypto.AESEncryptor;
 import com.uit.daa.issuer.Models.crypto.BNCurve;
+import com.uit.daa.issuer.Models.crypto.BitKeySelector;
+import com.uit.daa.issuer.Models.crypto.DESEncryptor;
 import iaik.security.ec.math.curve.ECPoint;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.SQLException;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -396,7 +402,37 @@ public class IssuerController {
         mav.addObject("service_epk", DirtyWork.bytesToHex(service.member.epk));
         mav.addObject("user_job_cert",job_cert);
         mav.addObject("service_permission_cert",permission_cert);
+        
+        //test share key
+        ECPoint usharekey = issuer.pk.X.multiplyPoint(new BigInteger(user.member.esk));
+        ECPoint user_pk  = curve.getG2().multiplyPoint(new BigInteger(user.member.esk));
+        ECPoint isharekey = user_pk.multiplyPoint(issuer.getSk().x);
+        mav.addObject("user_share_key",DirtyWork.bytesToHex(usharekey.encodePoint()));
+        mav.addObject("issuer_share_key_with_user", DirtyWork.bytesToHex(isharekey.encodePoint()));
+        boolean correct = usharekey.getCoordinate().getX().getField().getCardinality()
+                .equals(isharekey.getCoordinate().getX().getField().getCardinality());
+        
+        
+        try{
+        BigInteger k = isharekey.getCoordinate().getX().getField().getCardinality();
+        SecretKeySpec key = BitKeySelector.getDES56Key(k.toByteArray());
+        DESEncryptor des = new DESEncryptor(key);
+        
+        String e = des.encrypt("plaintext");
+        String d = des.decrypt(e);
+        mav.addObject("ciphertext",e);
+        mav.addObject("plaintext",d);
+        correct &= d.equals("plaintext");
+        }
+        catch(Exception e){
+            mav.addObject("ciphertext",e.getCause());
+            mav.addObject("plaintext",e.getMessage());
+        }
+        
+        mav.addObject("correct_share_key",correct);
         return mav;
+        
+        
         
     }   
     

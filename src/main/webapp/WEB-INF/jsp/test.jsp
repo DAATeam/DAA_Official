@@ -35,5 +35,12 @@
         <p>result : ${verify_service}</p>
        <h4>Service verify user </h4>
         <p>result : ${verify_user}</p>
+        <h4>Test share key</h4>
+        <p>user share key   : ${user_share_key}</p>
+        <p>issuer share key : ${issuer_share_key_with_user}</p>
+        <p>cipher : ${ciphertext} </p>
+        <p>plain  : ${plaintext} </p>
+        <p>correct : ${correct_share_key} </p>
+        
    </body>
 </html>
