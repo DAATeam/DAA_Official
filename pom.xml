@@ -103,12 +103,12 @@
         <dependency>
             <groupId>at.tugraz.iaik</groupId>
             <artifactId>eccelerate</artifactId>
-            <version>3.01</version>
+            <version>3.02</version>
         </dependency>
         <dependency>
             <groupId>at.tugraz.iaik</groupId>
             <artifactId>eccelerate-addon</artifactId>
-            <version>3.01</version>
+            <version>3.02</version>
         </dependency>
 
         <dependency>
@@ -128,6 +128,11 @@
 			<artifactId>hibernate-validator</artifactId>
 			<version>5.2.4.Final</version>
 		</dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
+        </dependency>
             
         
         
