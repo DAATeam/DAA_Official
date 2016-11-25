@@ -91,7 +91,7 @@ public class IssuerController {
     * Client authenticate with :
     * @appId : appId 
     * @M : identity for a member , work like a password 
-    * @return : a nonce number if member is valid
+    * @return : a nonce number if member is valid + issuer public key
     */
     private void prepare() throws SQLException, NoSuchAlgorithmException{
         if(ijt == null){
@@ -118,6 +118,7 @@ public class IssuerController {
                 Nonce nonce = ijt.createNonce(jva.getAppId(), issuer, random);
                 json.put( C.CL_NONCE,nonce.getNonce().toString());
                 json.put(CURVE, Config.curveName);
+                json.put(IPK, issuer.pk.toJSON(issuer.getCurve()));
             }
             else{
                 json.put(STATUS,ERROR);
@@ -159,7 +160,7 @@ public class IssuerController {
                  json.put(STATUS,OK);
                  json.put(MESSAGE, "Certificated");
                  json.put(JM2,jm2.toJson(issuer.getCurve()));
-                 json.put(IPK, issuer.pk.toJSON(issuer.getCurve()));
+     
                  
                  extractMemberDataByField(jm1.getFields(),nonce,ijt);
              }
