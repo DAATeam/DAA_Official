@@ -75,10 +75,10 @@ public class ManipulateQueryHelper {
                 sql += ",";
             }
               sql+= columnNames.get(columnNames.size()-1) + " = ?";
-              sql+= " ";
+              sql+= " where ";
             if(whereclauses.size() > 0){
                 for(int i =0; i< whereclauses.size(); i++){
-                    sql += whereclauses.get(i) + " ?";
+                    sql += whereclauses.get(i) + " ? ";
                     
                 }
             }

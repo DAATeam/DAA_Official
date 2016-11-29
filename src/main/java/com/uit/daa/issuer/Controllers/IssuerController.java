@@ -304,66 +304,6 @@ public class IssuerController {
         return ver.verify(signature,basename , issuer.pk, null);
     }
     
-    @RequestMapping(value="/addUser", method = RequestMethod.POST)
-    public void addUser(HttpServletResponse res,
-            @ModelAttribute("addUserData") @Valid addUserData data,
-            BindingResult result) throws JSONException, SQLException, IOException, NoSuchAlgorithmException, IOException{
-        JSONObject json = new JSONObject();
-        prepare();
-        if(result.hasErrors()){
-            json.put(STATUS, ERROR);
-            json.put(MESSAGE, "Invalid input");
-        }
-        else{
-            Member m = data.createNewMember(ijt.jdbcTemplate);
-            data.createNewUser(ijt.jdbcTemplate,m);
-            json.put(STATUS, OK);
-            json.put(MESSAGE,"successful" );
-        }
-        res.getWriter().println(json.toString());
-    }
-    @RequestMapping(value="/addService", method = RequestMethod.POST)
-    public void addService(HttpServletResponse res,
-            @ModelAttribute("addServiceData") @Valid addServiceData data,
-            BindingResult result) throws JSONException, SQLException, IOException, NoSuchAlgorithmException{
-        JSONObject json = new JSONObject();
-        prepare();
-        if(result.hasErrors()){
-            json.put(STATUS, ERROR);
-            json.put(MESSAGE, "Invalid input");
-        }
-        else{
-            data.createNewMember(ijt.jdbcTemplate);
-            data.createNewService(ijt.jdbcTemplate);
-            json.put(STATUS, OK);
-            json.put(MESSAGE,"successful" );
-        }
-        res.getWriter().println(json.toString());
-    }
-    @RequestMapping(value="/addApp", method = RequestMethod.POST)
-    public void addApp(HttpServletResponse res,
-            @ModelAttribute("addAppData") @Valid addAppData data,
-            BindingResult result) throws JSONException, SQLException, IOException, NoSuchAlgorithmException{
-        JSONObject json = new JSONObject();
-        prepare();
-        if(result.hasErrors()){
-            json.put(STATUS, ERROR);
-            json.put(MESSAGE, "Invalid input");
-        }
-        else{
-            
-            App app = data.createNewApp(ijt.jdbcTemplate);
-            if(app != null){
-            json.put(STATUS, OK);
-            json.put(MESSAGE,"successful" );
-            }
-            else{
-                 json.put(STATUS, ERROR);
-            json.put(MESSAGE, "Wrong identity");
-            }
-        }
-        res.getWriter().println(json.toString());
-    }
     @RequestMapping("/test")
     public ModelAndView test() throws SQLException, NoSuchAlgorithmException{
         prepare();
