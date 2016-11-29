@@ -19,7 +19,7 @@ public class C {
     public static String TB_NONCE = "nonces";
     public static String TB_M_TYPE = "member_types";
     
-    public static String CL_ID = "_id";
+    public static String CL_ID = "id";
     public static String CL_ESK = "esk";
     public static String CL_EPK = "epk";
     public static String CL_M = "M";

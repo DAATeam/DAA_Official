@@ -44,7 +44,7 @@ public class Column {
         return this;
     }
     public Column setToDefaultIdField(){
-        field = "_id";
+        field = "id";
         dataType = DataTypeEnum.BIGINT;
         tag= "auto id";
         isPrimary = true;
