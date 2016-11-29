@@ -93,6 +93,7 @@ public class User {
             a.id =id;
             a.name = rs.getString(C.CL_NAME);
             a.job = rs.getString(C.CL_JOB);
+            a.resultSet = rs;
             
             return a;
             

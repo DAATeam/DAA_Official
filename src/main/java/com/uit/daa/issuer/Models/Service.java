@@ -96,7 +96,7 @@ public class Service {
             a.id =id;
             a.service_name = rs.getString(C.CL_SERNAME);
             a.service_permission = rs.getString(C.CL_PERMISSION);
-            
+            a.resultSet = rs;
             return a;
             
         }
