@@ -179,6 +179,22 @@ public class IssuerJdbcTemplate {
             pp.close();
             
         }
+        ManipulateQueryHelper mq = new ManipulateQueryHelper();
+        mq.addTableName(C.TB_M_TYPE);
+        mq.addColumnName(C.CL_M_TYPE_PREFIX);
+        sql = mq.getInsertSQL();
+        if(sql != null){
+            PreparedStatement pp2= (PreparedStatement) dataSource.getConnection().prepareStatement(sql);
+            pp2.setString(1,"user" );
+                       
+            pp2.executeUpdate();
+            
+            pp2.setString(1, "service");
+            pp2.executeUpdate();
+            pp2.close();
+            
+        }
+        
         //Member
         //Member m = new Member("LoveCat",curve, 1);
         //m.save(jdbcTemplate);
