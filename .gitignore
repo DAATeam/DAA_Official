@@ -1,4 +1,4 @@
-/target/**
 !**.war
 .idea/
 daa-issuer.iml
+target/

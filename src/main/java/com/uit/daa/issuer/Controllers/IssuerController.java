@@ -281,6 +281,8 @@ public class IssuerController {
                 else{
                     json.put(STATUS,ERROR);
                     json.put(MESSAGE,"Incorrect identity");
+                    json.put("sig.m",sig.m);
+                    json.put("nonce.message",nonce.message);
                 }
             }
         }

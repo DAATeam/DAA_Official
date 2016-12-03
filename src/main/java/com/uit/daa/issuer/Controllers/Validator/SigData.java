@@ -21,7 +21,7 @@ public class SigData {
     public String m;
     
     @NotNull
-    public String sig ; //hex string
+    public String sig; //hex string
     
     @NotNull
     public String nonce;
@@ -35,5 +35,46 @@ public class SigData {
         byte[] krd = DirtyWork.hexStringToByteArray(m);
         return new Authenticator.EcDaaSignature(encoded, krd, curve);
     }
-    
+
+    public SigData(String m, String sig, String nonce, String basename) {
+        this.m = m;
+        this.sig = sig;
+        this.nonce = nonce;
+        this.basename = basename;
+    }
+
+    public SigData() {
+    }
+
+    public String getM() {
+        return m;
+    }
+
+    public void setM(String m) {
+        this.m = m;
+    }
+
+    public String getSig() {
+        return sig;
+    }
+
+    public void setSig(String sig) {
+        this.sig = sig;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public String getBasename() {
+        return basename;
+    }
+
+    public void setBasename(String basename) {
+        this.basename = basename;
+    }
 }
