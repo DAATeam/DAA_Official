@@ -283,7 +283,7 @@ public class IssuerJdbcTemplate {
     public Member getMemberDataByNonce(BigInteger n) throws SQLException{
         SelectQueryHelper sq = new SelectQueryHelper();
         sq.addColumnName("*");
-        sq.addTableName(C.TB_NONCE).addTableName(C.TB_APP).addTableName(C.TB_MEMBER);
+        sq.addTableName(C.TB_MEMBER).addTableName(C.TB_APP).addTableName(C.TB_NONCE);
         sq.addWhereClause(null,C.TB_NONCE+"."+C.CL_APPID, "=", C.TB_APP+"."+C.CL_APPID);
         sq.addWhereClause("and", C.TB_APP+"."+C.CL_M_ID, "=", C.TB_MEMBER+"."+C.CL_ID);
         String sql = sq.getSelectSQL();

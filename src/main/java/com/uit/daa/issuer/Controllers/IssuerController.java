@@ -263,9 +263,9 @@ public class IssuerController {
                 
             }
             else{
-                if(sig.m.equals(nonce.message)){
+                if(nonce.message != null){
                     
-                    if(verifyEcDaaSig(issuer, sig.sig, sig.m, sig.basename)){
+                    if(verifyEcDaaSig(issuer, sig.sig, nonce.message, sig.basename)){
                         
                     String cert = createCertificate(issuer,sig.sig);
                     json.put(STATUS, OK);
@@ -275,13 +275,13 @@ public class IssuerController {
                     else{
                         json.put(STATUS, ERROR);
                     json.put(MESSAGE,"Invalid Signature");
+                        json.put("nonce.message", nonce.message);
                     }
                     
                 }
                 else{
                     json.put(STATUS,ERROR);
                     json.put(MESSAGE,"Incorrect identity");
-                    json.put("sig.m",sig.m);
                     json.put("nonce.message",nonce.message);
                 }
             }

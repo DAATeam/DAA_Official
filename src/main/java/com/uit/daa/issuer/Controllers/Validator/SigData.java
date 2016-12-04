@@ -17,9 +17,7 @@ import javax.validation.constraints.NotNull;
  */
 
 public class SigData {
-    @NotNull
-    public String m;
-    
+        
     @NotNull
     public String sig; //hex string
     
@@ -28,30 +26,14 @@ public class SigData {
     
     @NotNull
     public String basename;
-    
-    public Authenticator.EcDaaSignature getEcDaaSignature(){
-        BNCurve curve = BNCurve.createBNCurveFromName(Config.curveName);
-        byte[] encoded = DirtyWork.hexStringToByteArray(sig);
-        byte[] krd = DirtyWork.hexStringToByteArray(m);
-        return new Authenticator.EcDaaSignature(encoded, krd, curve);
-    }
 
-    public SigData(String m, String sig, String nonce, String basename) {
-        this.m = m;
+    public SigData(String sig, String nonce, String basename) {
         this.sig = sig;
         this.nonce = nonce;
         this.basename = basename;
     }
 
     public SigData() {
-    }
-
-    public String getM() {
-        return m;
-    }
-
-    public void setM(String m) {
-        this.m = m;
     }
 
     public String getSig() {
