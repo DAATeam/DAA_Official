@@ -263,9 +263,9 @@ public class IssuerController {
                 
             }
             else{
-                if(sig.m.equals(nonce.message)){
+                if(nonce.message != null){
                     
-                    if(verifyEcDaaSig(issuer, sig.sig, sig.m, sig.basename)){
+                    if(verifyEcDaaSig(issuer, sig.sig, nonce.message, sig.basename)){
                         
                     String cert = createCertificate(issuer,sig.sig);
                     json.put(STATUS, OK);
