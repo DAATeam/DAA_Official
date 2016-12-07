@@ -29,7 +29,38 @@ public class SigData {
     
     
     public SigData(){
-        
+        sig = null;
+        nonce = null;
+        basename=null;
+    }
+    public SigData(String sig , String nonce, String basename){
+        this.sig = sig;
+        this.nonce = nonce;
+        this.basename = basename;
+    }
+
+    public String getSig() {
+        return sig;
+    }
+
+    public void setSig(String sig) {
+        this.sig = sig;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public String getBasename() {
+        return basename;
+    }
+
+    public void setBasename(String basename) {
+        this.basename = basename;
     }
     
 }
