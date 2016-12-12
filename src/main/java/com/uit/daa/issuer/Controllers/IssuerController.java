@@ -303,6 +303,10 @@ public class IssuerController {
                 DirtyWork.hexStringToByteArray(sig), message.getBytes(), curve);
         return ver.verify(signature,basename , issuer.pk, null);
     }
+    private boolean linkEcDaaSig(Authenticator.EcDaaSignature sig1,Authenticator.EcDaaSignature sig2, BNCurve curve){
+            Verifier ver  = new Verifier(curve);
+            return ver.link(sig1, sig2);
+    }
     
     @RequestMapping("/test")
     public ModelAndView test() throws SQLException, NoSuchAlgorithmException{
@@ -320,10 +324,13 @@ public class IssuerController {
         user_auth.EcDaaJoin2(issuer.EcDaaIssuerJoin(user_auth.EcDaaJoin1(issuer.GetNonce())));
         service_auth.EcDaaJoin2(issuer.EcDaaIssuerJoin(service_auth.EcDaaJoin1(issuer.GetNonce())));
         issuer_auth.EcDaaJoin2(issuer.EcDaaIssuerJoin(issuer_auth.EcDaaJoin1(issuer.GetNonce())));
-        Authenticator.EcDaaSignature permission_sig = service_auth.EcDaaSign(
-                C.CL_PERMISSION, service.service_permission);
+        Authenticator.EcDaaSignature permission_sig = service_auth.EcDaaSignWithNym(
+                C.CL_PERMISSION, service.service_permission,"sessionId");
+        Authenticator.EcDaaSignature session_sig = service_auth.EcDaaSignWithNym(
+                C.CL_PERMISSION, "sessionNumber","sessionId");
         String permission_cert = createCertificate(issuer, 
                 DirtyWork.bytesToHex(permission_sig.encode(curve)));
+        
         Authenticator.EcDaaSignature job_sig = user_auth.EcDaaSign(C.CL_JOB,user.job);
         String job_cert = createCertificate(issuer, 
                 DirtyWork.bytesToHex(job_sig.encode(curve)));
@@ -335,7 +342,7 @@ public class IssuerController {
         valid_ser &= verifyEcDaaSig(issuer,permission_cert,DirtyWork.bytesToHex(permission_sig.encode(curve)),CERT_BASENAME);
         valid_user &= verifyEcDaaSig(issuer,DirtyWork.bytesToHex(job_sig.encode(curve)),user.job,C.CL_JOB);
         valid_user &= verifyEcDaaSig(issuer,job_cert,DirtyWork.bytesToHex(job_sig.encode(curve)), CERT_BASENAME);
-        
+        valid_ser &= linkEcDaaSig(permission_sig, session_sig, curve);
        
         mav.addObject("verify_service", valid_ser);
         mav.addObject("verify_user",valid_user);

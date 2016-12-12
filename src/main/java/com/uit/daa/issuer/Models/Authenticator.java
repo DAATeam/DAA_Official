@@ -21,6 +21,7 @@ import com.uit.daa.issuer.Models.Issuer.IssuerPublicKey;
 import com.uit.daa.issuer.Models.Issuer.JoinMessage1;
 import com.uit.daa.issuer.Models.Issuer.JoinMessage2;
 import com.uit.daa.issuer.Models.crypto.BNCurve;
+import com.uit.daa.issuer.Models.crypto.MD5Helper;
 
 /**
  * Class containing the Authenticator ECDAA functions
@@ -169,6 +170,17 @@ public class Authenticator {
 		BigInteger s2 = r2.add(c2.multiply(this.sk).mod(this.curve.getOrder())).mod(this.curve.getOrder());
 		return new EcDaaSignature(r, s, t, w, c2, s2, krd);
 	}
+        public EcDaaSignature EcDaaSignWithNym(String basename, String message, String seed) throws NoSuchAlgorithmException{
+            EcDaaSignature ecdaaSIg = EcDaaSign(basename, message);
+            byte[] bytes = BNCurve.mergeByteArrays(
+                    seed.getBytes(),
+                    this.sk.toByteArray()
+            );
+            byte[] hashcode = MD5Helper.hashBytesToByte(bytes);
+            ecdaaSIg.nym = hashcode;
+            return ecdaaSIg;
+        }
+        
 	
 	/**
 	 * Data type holding ECDAA signatures
@@ -179,7 +191,8 @@ public class Authenticator {
 		public final ECPoint r, s, t, w;
 		public final BigInteger c2, s2;
 		public final byte[] krd;
-		
+                //nym implementation 
+                public byte[] nym;
 		public EcDaaSignature(ECPoint r, ECPoint s, ECPoint t, ECPoint w, BigInteger c2, BigInteger s2, byte[] krd) {
 			this.r = r;
 			this.s = s;
@@ -218,6 +231,42 @@ public class Authenticator {
 					curve.point1ToBytes(this.t),
 					curve.point1ToBytes(this.w));
 		}
+                 public byte[] encodeWithNym(BNCurve curve) {
+			return BNCurve.mergeByteArrays(
+					curve.bigIntegerToB(this.c2),
+					curve.bigIntegerToB(this.s2),
+					curve.point1ToBytes(this.r),
+					curve.point1ToBytes(this.s),
+					curve.point1ToBytes(this.t),
+					curve.point1ToBytes(this.w),
+                                        nym
+                                        );
+		}
+                /**
+                 * Construc a Signature with nym , use for linkability
+                 * @param encoded
+                 * @param message
+                 * @param curve
+                 * @return 
+                 */
+                public static EcDaaSignature decodeWithNym(byte[] encoded, byte[] message, BNCurve curve){
+                   
+                   if(encoded.length != 10*curve.byteLength()+4 + 16) { //nym is 16 byte
+				throw new IllegalArgumentException("Invalid encoding: encoding does not have the expected length");
+			}
+			BigInteger c2 = curve.bigIntegerFromB(Arrays.copyOfRange(encoded, 0, curve.byteLength()));
+			 BigInteger s2 = curve.bigIntegerFromB(Arrays.copyOfRange(encoded, curve.byteLength(), 2*curve.byteLength()));
+			ECPoint r = curve.point1FromBytes(Arrays.copyOfRange(encoded, 2*curve.byteLength(), 4*curve.byteLength()+1));
+			ECPoint s = curve.point1FromBytes(Arrays.copyOfRange(encoded, 4*curve.byteLength()+1, 6*curve.byteLength()+2));
+			ECPoint t = curve.point1FromBytes(Arrays.copyOfRange(encoded, 6*curve.byteLength()+2, 8*curve.byteLength()+3));
+			ECPoint w = curve.point1FromBytes(Arrays.copyOfRange(encoded, 8*curve.byteLength()+3, 10*curve.byteLength()+4));
+			byte[] nym = Arrays.copyOfRange(encoded, 10*curve.byteLength()+4, encoded.length-1);
+                        
+			byte[] krd = message;
+                        EcDaaSignature sigwithNym = new EcDaaSignature(r, s, t, w, c2, s2, krd);
+                        sigwithNym.nym = nym;
+                        return sigwithNym;
+                }
 		
 		public boolean equals(Object o) {
 			if(!(o instanceof EcDaaSignature)) {
@@ -249,5 +298,6 @@ public class Authenticator {
 			result = 31 * result + this.krd.hashCode();
 			return result;
 		}
+
 	}
 }

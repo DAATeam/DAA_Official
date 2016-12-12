@@ -23,6 +23,7 @@ import com.google.gson.JsonParser;
 import com.uit.daa.issuer.Models.Authenticator.EcDaaSignature;
 import com.uit.daa.issuer.Models.Issuer.IssuerPublicKey;
 import com.uit.daa.issuer.Models.crypto.BNCurve;
+import java.util.Arrays;
 
 /**
  * Class containing the Verifier ECDAA functions
@@ -122,4 +123,13 @@ public class Verifier {
 		}
 		return rl;
 	}
+        public boolean link(EcDaaSignature sig1, EcDaaSignature sig2){
+            if(sig1.nym!= null && sig2.nym != null){
+                if(Arrays.equals(sig1.nym, sig2.nym)){
+                    return true;
+                }
+                else return false;
+            }
+            else return false;
+        }
 }
