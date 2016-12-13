@@ -26,14 +26,17 @@ public class SigData {
     
     @NotNull
     public String basename;
-
-    public SigData(String sig, String nonce, String basename) {
+    
+    
+    public SigData(){
+        sig = null;
+        nonce = null;
+        basename=null;
+    }
+    public SigData(String sig , String nonce, String basename){
         this.sig = sig;
         this.nonce = nonce;
         this.basename = basename;
-    }
-
-    public SigData() {
     }
 
     public String getSig() {
@@ -59,4 +62,5 @@ public class SigData {
     public void setBasename(String basename) {
         this.basename = basename;
     }
+
 }
