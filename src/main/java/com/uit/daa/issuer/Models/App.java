@@ -19,9 +19,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * @author nguyenduyy
  */
 public class App {
-    Member M;
-    Integer appID ;
-    String deviceID;
+    public Member M;
+    public Integer appID ;
+    public String deviceID;
     public App(){
         
     }
@@ -58,6 +58,7 @@ public class App {
             a.M.epk = rs.getBytes(C.CL_EPK);
             a.M.esk = rs.getBytes(C.CL_ESK);
             a.M.M = rs.getString(C.CL_M);
+            a.M.type = rs.getInt(C.CL_M_TYPE_ID);
             a.appID =id;
             a.deviceID = rs.getString(C.CL_DEVICEID);
             

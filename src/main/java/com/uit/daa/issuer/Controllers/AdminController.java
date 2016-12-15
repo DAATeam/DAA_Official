@@ -12,11 +12,17 @@ import static com.uit.daa.issuer.Controllers.IssuerController.STATUS;
 import com.uit.daa.issuer.Controllers.Validator.addAppData;
 import com.uit.daa.issuer.Controllers.Validator.addServiceData;
 import com.uit.daa.issuer.Controllers.Validator.addUserData;
+import com.uit.daa.issuer.Controllers.Validator.buildAppData;
+import com.uit.daa.issuer.Controllers.Validator.buildMemberData;
+import com.uit.daa.issuer.Controllers.Validator.buildUserData;
 import com.uit.daa.issuer.Jdbc.IssuerJdbcTemplate;
 import com.uit.daa.issuer.Models.App;
 import com.uit.daa.issuer.Models.Issuer;
 import com.uit.daa.issuer.Models.Member;
+import com.uit.daa.issuer.Models.User;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.SQLException;
@@ -31,6 +37,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  *
@@ -111,5 +118,39 @@ public class AdminController {
         }
         res.getWriter().println(json.toString());
     }
+    @RequestMapping("/app")
+    public void data (HttpServletResponse res,
+            @ModelAttribute("buildAppData") @Valid buildAppData data,
+            BindingResult result) throws JSONException, SQLException, IOException, NoSuchAlgorithmException{
+        JSONObject json = new JSONObject();
+        prepare();
+        if(result.hasErrors()){
+            json.put(STATUS, ERROR);
+            json.put(MESSAGE, "Invalid input");
+            res.getWriter().println(json.toString());
+        }
+        else{
+            String s = "";
+            byte[] r;
+            try{
+             r = data.buildEncodedJSON(ijt.jdbcTemplate, issuer);
+             OutputStream out = res.getOutputStream();
+            ByteArrayInputStream bais = new ByteArrayInputStream(r);
+            int length;
+            byte[] buffer = new byte[4096];
+            while ((length = bais.read(buffer)) > 0){
+                out.write(buffer, 0, length);
+            }
+            bais.close();
+            out.flush();
+            }catch(Exception e){
+                res.sendRedirect("/welcome");
+            }
+            
+            
+            
+        }
+    }
+    
     
 }

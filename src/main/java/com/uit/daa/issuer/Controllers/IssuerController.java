@@ -12,6 +12,7 @@ import com.uit.daa.issuer.Controllers.Validator.SigData;
 import com.uit.daa.issuer.Controllers.Validator.addAppData;
 import com.uit.daa.issuer.Controllers.Validator.addServiceData;
 import com.uit.daa.issuer.Controllers.Validator.addUserData;
+import com.uit.daa.issuer.Controllers.Validator.buildAppData;
 import com.uit.daa.issuer.Jdbc.C;
 import com.uit.daa.issuer.Jdbc.IssuerJdbcTemplate;
 import com.uit.daa.issuer.Models.App;
@@ -28,7 +29,9 @@ import com.uit.daa.issuer.Models.crypto.BNCurve;
 import com.uit.daa.issuer.Models.crypto.BitKeySelector;
 import com.uit.daa.issuer.Models.crypto.DESEncryptor;
 import iaik.security.ec.math.curve.ECPoint;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -389,7 +392,6 @@ public class IssuerController {
         
         
     }   
-    
-    
+ 
     
 }
