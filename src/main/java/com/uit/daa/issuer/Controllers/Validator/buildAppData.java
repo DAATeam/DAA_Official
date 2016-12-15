@@ -63,8 +63,8 @@ public class buildAppData {
         afb.setIpk(issuer.pk.toJSON(issuer.getCurve()));
         String res = afb.toJSON();
         //FIXME : encode data here
-        byte[] encoded = AESEncryptor.encrypt(BitKeySelector.getAES128Key(afb.getDecryptKey()), IV, res);
-        return encoded;
+        //byte[] encoded = AESEncryptor.encrypt(BitKeySelector.getAES128Key(afb.getDecryptKey()), IV, res);
+        return res.getBytes();
         
     }
 
