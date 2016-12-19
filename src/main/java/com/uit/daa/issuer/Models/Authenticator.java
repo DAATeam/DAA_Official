@@ -30,7 +30,7 @@ import com.uit.daa.issuer.Models.crypto.MD5Helper;
  *
  */
 public class Authenticator {
-	private BigInteger sk;
+	public  BigInteger sk;
 	private ECPoint Q; // authenticator public key
 	private SecureRandom random;
 	private BNCurve curve;
@@ -167,9 +167,10 @@ public class Authenticator {
 				this.curve.point1ToBytes(w),
 				basename.getBytes(),
 				this.curve.hash(krd));
-		BigInteger s2 = r2.add(c2.multiply(this.sk).mod(this.curve.getOrder())).mod(this.curve.getOrder());
+                BigInteger s2 = r2.add(c2.multiply(this.sk).mod(this.curve.getOrder())).mod(this.curve.getOrder());
 		return new EcDaaSignature(r, s, t, w, c2, s2, krd);
 	}
+        
         public EcDaaSignature EcDaaSignWithNym(String basename, String message, String seed) throws NoSuchAlgorithmException{
             EcDaaSignature ecdaaSIg = EcDaaSign(basename, message);
             byte[] bytes = BNCurve.mergeByteArrays(
@@ -179,6 +180,33 @@ public class Authenticator {
             byte[] hashcode = MD5Helper.hashBytesToByte(bytes);
             ecdaaSIg.nym = hashcode;
             return ecdaaSIg;
+        }
+        public EcDaaSignature EcDaaSignWrt(byte[] session ,String basename, String message ) throws NoSuchAlgorithmException {
+		if(this.joinState != JoinState.JOINED){
+			throw new IllegalStateException("The authenticator must join before it can sign");
+		}
+		
+		//byte[] krd = this.buildAndEncodeKRD();
+                byte[] krd = message.getBytes();
+		
+		// Randomize the credential
+		BigInteger l = this.curve.hashModOrder(session);
+		ECPoint r = a.multiplyPoint(l);
+		ECPoint s = b.multiplyPoint(l);
+		ECPoint t = c.multiplyPoint(l);
+		ECPoint w = d.multiplyPoint(l);		
+		
+		// Create proof SPK{(sk): w = s^sk}(krd, appId)
+		BigInteger r2 = this.curve.getRandomModOrder(random);
+		ECPoint u = s.multiplyPoint(r2);
+		BigInteger c2 = this.curve.hashModOrder(
+				this.curve.point1ToBytes(u),
+				this.curve.point1ToBytes(s),
+				this.curve.point1ToBytes(w),
+				basename.getBytes(),
+				this.curve.hash(krd));
+                BigInteger s2 = r2.add(c2.multiply(this.sk).mod(this.curve.getOrder())).mod(this.curve.getOrder());
+		return new EcDaaSignature(r, s, t, w, c2, s2, krd);
         }
         
 	

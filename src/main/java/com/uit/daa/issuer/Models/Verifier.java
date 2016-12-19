@@ -23,6 +23,7 @@ import com.google.gson.JsonParser;
 import com.uit.daa.issuer.Models.Authenticator.EcDaaSignature;
 import com.uit.daa.issuer.Models.Issuer.IssuerPublicKey;
 import com.uit.daa.issuer.Models.crypto.BNCurve;
+import iaik.security.ec.math.curve.ECPoint;
 import java.util.Arrays;
 
 /**
@@ -84,6 +85,20 @@ public class Verifier {
 		
 		return success;
 	}
+        
+        public boolean verifyWrt(byte[] message, byte[] session,EcDaaSignature signature, String appId, IssuerPublicKey pk, Set<BigInteger> revocationList) throws NoSuchAlgorithmException {
+            BigInteger l = this.curve.hashModOrder(message);
+            ECPoint a  = this.curve.getG1().multiplyPoint(l);
+            BigInteger h = this.curve.hashModOrder(session);
+            ECPoint r = a.multiplyPoint(h);
+            boolean success = true;
+            success &= (signature.r.getCoordinate().getX().getField().getCardinality() == r.getCoordinate().getX().getField().getCardinality());
+            success &= (signature.r.getCoordinate().getY().getField().getCardinality() == r.getCoordinate().getY().getField().getCardinality());
+            if(success){
+                return verify(signature, appId, pk, revocationList);
+            }
+            else return success;
+        }
 	
 	/**
 	 * Turns a revocation list as a set of big integers into a JSON object

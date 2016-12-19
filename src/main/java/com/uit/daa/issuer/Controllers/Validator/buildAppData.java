@@ -58,7 +58,7 @@ public class buildAppData {
         afb.setFields(aaff);
         afb.setAppId(app.appID.toString());
         afb.setCurve(issuer.getCurve().getName());
-        afb.setEsk(member.esk);
+        //afb.setEsk(member.esk);
         afb.setDecryptKey(member.M.getBytes());
         afb.setIpk(issuer.pk.toJSON(issuer.getCurve()));
         String res = afb.toJSON();

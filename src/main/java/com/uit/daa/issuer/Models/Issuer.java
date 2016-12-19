@@ -507,4 +507,88 @@ public class Issuer {
 		BigInteger s2 = (r2.add(c2.multiply(t).mod(this.curve.getOrder()))).mod(this.curve.getOrder());
 		return new JoinMessage2(a, b, c, d, c2, s2);
 	}
+        /**nguyenduyy
+         * 
+         * @param gsk
+         * @param info
+         * @return
+         * @throws NoSuchAlgorithmException 
+         */
+        public JoinMessage2 createStaticCredential(BigInteger gsk, byte[] info) throws NoSuchAlgorithmException{
+            BigInteger l = this.curve.hashModOrder(info);
+            ECPoint Q = this.curve.getG1().multiplyPoint(gsk);
+            ECPoint a = this.curve.getG1().multiplyPoint(l);
+            ECPoint b = a.multiplyPoint(this.sk.y);
+            ECPoint c = a.multiplyPoint(this.sk.x).addPoint(Q.multiplyPoint(this.sk.x.multiply(this.sk.y).multiply(l).mod(this.curve.getOrder()))); // c = a^x * Q^{xyl}
+            ECPoint d =Q.multiplyPoint(l.multiply(this.sk.y).mod(this.curve.getOrder()));
+            
+            BigInteger t = l.multiply(this.sk.y).mod(this.curve.getOrder());
+		BigInteger r2 = this.curve.getRandomModOrder(random);
+		ECPoint u2 = this.curve.getG1().multiplyPoint(r2);
+		ECPoint v2 = Q.multiplyPoint(r2);
+		BigInteger c2 = this.curve.hashModOrder(
+				this.curve.point1ToBytes(u2),
+				this.curve.point1ToBytes(v2),
+				this.curve.point1ToBytes(this.curve.getG1()),
+				this.curve.point1ToBytes(b),
+				this.curve.point1ToBytes(Q),
+				this.curve.point1ToBytes(d));
+		BigInteger s2 = (r2.add(c2.multiply(t).mod(this.curve.getOrder()))).mod(this.curve.getOrder());
+                return new JoinMessage2(a,b,c,d,c2,s2);
+        }
+        /**nguyenduyy
+         * create jm2 with respected to a info
+         * @param message
+         * @param info 
+         * @param checkNonce
+         * @return
+         * @throws NoSuchAlgorithmException 
+         */
+        public JoinMessage2 EcDaaIssuerJoinWrtInfo(JoinMessage1 message, byte[] info, boolean checkNonce) throws NoSuchAlgorithmException {
+		//FIXME If this join is not in factory, Q must be sent in an authenticated way
+		
+		boolean success = true;
+		
+		// Check nonce freshness
+		if(checkNonce) {
+			success &= this.nonces.contains(message.nonce);
+			this.nonces.remove(message.nonce);
+		}
+		
+		// Check that Q is on the curve
+		success &= this.curve.isInG1(message.Q);
+		
+		// Verify that c1, s1 prove SPK{(sk): Q = g_1^{sk}}(nonce)
+		success &= message.c1.equals(this.curve.hashModOrder(
+				this.curve.point1ToBytes(this.curve.getG1().multiplyPoint(message.s1).subtractPoint(message.Q.multiplyPoint(message.c1))),
+				this.curve.point1ToBytes(this.curve.getG1()),
+				this.curve.point1ToBytes(message.Q),
+				this.curve.bigIntegerToB(message.nonce)));
+		
+		if(!success) {
+			return null;
+		}
+		
+		// Create CL04 Credential
+		BigInteger l = this.curve.hashModOrder(info);
+		ECPoint a = this.curve.getG1().multiplyPoint(l);
+		ECPoint b = a.multiplyPoint(this.sk.y);
+		ECPoint c = a.multiplyPoint(this.sk.x).addPoint(message.Q.multiplyPoint(this.sk.x.multiply(this.sk.y).multiply(l).mod(this.curve.getOrder()))); // c = a^x * Q^{xyl}
+		ECPoint d = message.Q.multiplyPoint(l.multiply(this.sk.y).mod(this.curve.getOrder()));
+		
+		// Prove the credential was correctly computed: SPK{(t): b = g_1^t and d = Q^t}
+		BigInteger t = l.multiply(this.sk.y).mod(this.curve.getOrder());
+		BigInteger r2 = this.curve.getRandomModOrder(random);
+		ECPoint u2 = this.curve.getG1().multiplyPoint(r2);
+		ECPoint v2 = message.Q.multiplyPoint(r2);
+		BigInteger c2 = this.curve.hashModOrder(
+				this.curve.point1ToBytes(u2),
+				this.curve.point1ToBytes(v2),
+				this.curve.point1ToBytes(this.curve.getG1()),
+				this.curve.point1ToBytes(b),
+				this.curve.point1ToBytes(message.Q),
+				this.curve.point1ToBytes(d));
+		BigInteger s2 = (r2.add(c2.multiply(t).mod(this.curve.getOrder()))).mod(this.curve.getOrder());
+		return new JoinMessage2(a, b, c, d, c2, s2);
+	}
 }
