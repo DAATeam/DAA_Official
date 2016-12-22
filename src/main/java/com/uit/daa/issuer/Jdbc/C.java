@@ -19,6 +19,7 @@ public class C {
     public static String TB_NONCE = "nonces";
     public static String TB_M_TYPE = "member_types";
     
+    
     public static String CL_ID = "_id";
     public static String CL_ESK = "esk";
     public static String CL_EPK = "epk";
@@ -30,7 +31,10 @@ public class C {
     public static String CL_NAME = "user_name";
     public static String CL_JOB = "user_job";
     public static String CL_SERNAME = "service_name";
-    public static String CL_PERMISSION = "service_permission";
+    public static String CL_SERVICE_LEVEL = "service_level";
+    public static String CL_USER_LEVEL = "user_level";
+    public static String CL_LEVEL_SENDER = "sender";
+    public static String CL_LEVEL_RECIEVER = "receiver";
     public static String CL_FIELD = "field";
     public static String CL_CODE = "code";
     public static String CL_LEVEL = "level";
@@ -43,4 +47,9 @@ public class C {
     public static String CL_MESSAGE ="message";
     public static String CL_M_TYPE_ID = "member_type_id";
     public static String CL_M_TYPE_PREFIX = "mprefix";
+    public static String CL_LEVEL_NAME = "level_name";
+    public static String CL_LEVEL_PERMISSION = "level_permission";
+    public static String CL_USER_ACCOUNT = "user_account";
+    public static String CL_SERVICE_ACCOUNT = "service_account";
+    public static String CL_USER_DRIVE = "user_drive_expire";
 }

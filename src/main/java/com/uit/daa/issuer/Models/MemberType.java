@@ -23,6 +23,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class MemberType {
     public static final int USER_TYPE  =1;
     public static final int SERVICE_TYPE = 2;
+    public static final int BANK_TYPE =3;
+    public static final int POLICE_TYPE = 4;
     public Integer id;
     public String prefix;
     

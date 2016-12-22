@@ -7,6 +7,7 @@ package com.uit.daa.issuer.Controllers.Validator;
 
 
 import com.uit.daa.issuer.Controllers.Config;
+import com.uit.daa.issuer.Jdbc.C;
 import com.uit.daa.issuer.Models.Member;
 import com.uit.daa.issuer.Models.MemberType;
 import com.uit.daa.issuer.Models.User;
@@ -27,6 +28,15 @@ public class addUserData {
     public String user_job;
     
     @NotNull
+    public String user_account;
+    
+    @NotNull
+    public String user_drive_expire;
+    
+   
+    
+    
+    @NotNull
     public String M;
     
     
@@ -37,7 +47,13 @@ public class addUserData {
         return m;
     }
     public User createNewUser(JdbcTemplate j, Member m) throws SQLException{
-        User user = new User(m,user_name, user_job);
+        User user = new User(m);
+        user.setInfo(C.CL_NAME, user_name);
+        user.setInfo(C.CL_JOB, user_job);
+        user.setInfo(C.CL_USER_ACCOUNT, user_account);
+        user.setInfo(C.CL_USER_DRIVE, user_drive_expire);
+        
+   
         user.save(j);
         return user;
     }
@@ -65,6 +81,23 @@ public class addUserData {
     public void setM(String M) {
         this.M = M;
     }
+
+    public String getUser_account() {
+        return user_account;
+    }
+
+    public void setUser_account(String user_account) {
+        this.user_account = user_account;
+    }
+
+    public String getUser_drive_expire() {
+        return user_drive_expire;
+    }
+
+    public void setUser_drive_expire(String user_drive_expire) {
+        this.user_drive_expire = user_drive_expire;
+    }
+    
     
     
     

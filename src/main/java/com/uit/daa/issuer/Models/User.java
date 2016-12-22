@@ -14,34 +14,46 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+
 /**
  *
  * @author nguyenduyy
  */
-public class User {
-    public String name;
-    public String job;
-    public Member member;
-    public Integer id;
+public class User extends MemberInfo{
+    //info fields, except id and member id
+    public final static String[] fieldSet = { C.CL_NAME, C.CL_JOB, C.CL_USER_ACCOUNT, C.CL_USER_DRIVE};
     public ResultSet resultSet;
-    public User(Member m, String n, String j){
+    
+    
+    public User(Member m){
         this.member = m;
-        this.name = n;
-        this.job = j;
+        initData();
     }
     public User(){
-        
+        initData();
     }
+    private void initData(){
+        for(int i=0; i< fieldSet.length; i++){
+            infoMap.put(fieldSet[i], "");
+        }
+    }
+    
     public void save(JdbcTemplate j) throws SQLException{
         ManipulateQueryHelper qh = new ManipulateQueryHelper();
         qh.addTableName(C.TB_USER);
-        qh.addColumnName(C.CL_NAME,C.CL_JOB, C.CL_M_ID);
+        for(int i=0; i<fieldSet.length; i++){
+            qh.addColumnName(fieldSet[i]);
+        }
+        qh.addColumnName(C.CL_M_ID);
         String sql = qh.getInsertSQL();
         if(sql != null){
         PreparedStatement pp = (PreparedStatement) j.getDataSource().getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        pp.setString(1, name);
-        pp.setString(2, job);
-        pp.setInt(3, member.id);
+        int i = 0;
+        for(i=0; i< fieldSet.length; i++){
+            pp.setString(i+1,infoMap.get(fieldSet[i]) );
+        }
+        
+        pp.setInt(i+1, this.member.id);
         pp.executeUpdate();
         ResultSet gk = pp.getGeneratedKeys();
             if(gk.next()){
@@ -65,8 +77,13 @@ public class User {
             a.member.esk = rs.getBytes(C.CL_ESK);
             a.member.M = rs.getString(C.CL_M);
             a.id =id;
-            a.name = rs.getString(C.CL_NAME);
-            a.job = rs.getString(C.CL_JOB);
+            Level l = new Level();
+            l.getFromLevelID(j,rs.getInt(C.CL_USER_LEVEL));
+            a.level = l;
+            for(int i=0; i< User.fieldSet.length; i++){
+               a.setInfo(User.fieldSet[i], rs.getString(User.fieldSet[i]));
+            }
+            
             a.resultSet = rs;
             return a;
             
@@ -91,8 +108,12 @@ public class User {
             a.member.esk = rs.getBytes(C.CL_ESK);
             a.member.M = rs.getString(C.CL_M);
             a.id =id;
-            a.name = rs.getString(C.CL_NAME);
-            a.job = rs.getString(C.CL_JOB);
+            String[] fs = User.fieldSet;
+            for(int i=0; i< fs.length; i++){
+                String f = fs[i];
+                a.setInfo(f, rs.getString(f));
+            }
+            
             a.resultSet = rs;
             
             return a;
@@ -103,15 +124,6 @@ public class User {
         }
     }
     
-    public boolean contain(String key, String value){
-        if(key.equals(C.CL_NAME)){
-            return value.equals(name);
-        }        
-        else if(key.equals(C.CL_JOB)){
-            return value.equals(job);
-        }
-        else return false;
-    }
     
           
 }
