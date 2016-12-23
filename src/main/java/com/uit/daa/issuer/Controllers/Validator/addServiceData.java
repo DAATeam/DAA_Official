@@ -6,6 +6,7 @@
 package com.uit.daa.issuer.Controllers.Validator;
 
 import com.uit.daa.issuer.Controllers.Config;
+import com.uit.daa.issuer.Jdbc.C;
 import com.uit.daa.issuer.Models.Member;
 import com.uit.daa.issuer.Models.MemberType;
 import com.uit.daa.issuer.Models.Service;
@@ -23,8 +24,7 @@ public class addServiceData {
     public String service_name;
     
     @NotNull
-    public String service_permission;
-    
+    public String service_account;
     @NotNull
     public String M;
     
@@ -41,7 +41,10 @@ public class addServiceData {
     }
     public Service createNewService(JdbcTemplate j) throws SQLException{
         if(member != null){
-        Service service = new Service(member,service_name, service_permission);
+        Service service = new Service(member);
+        service.setInfo(C.CL_SERNAME, service_name);
+        service.setInfo(C.CL_SERVICE_ACCOUNT, service_account);
+   
         service.save(j);
         return service;
         }
@@ -57,13 +60,7 @@ public class addServiceData {
         this.service_name = service_name;
     }
 
-    public String getService_permission() {
-        return service_permission;
-    }
-
-    public void setService_permission(String service_permission) {
-        this.service_permission = service_permission;
-    }
+   
 
     public String getM() {
         return M;
@@ -80,5 +77,15 @@ public class addServiceData {
     public void setMember(Member member) {
         this.member = member;
     }
+
+    public String getService_account() {
+        return service_account;
+    }
+
+    public void setService_account(String service_account) {
+        this.service_account = service_account;
+    }
+    
+    
     
 }

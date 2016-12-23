@@ -1,8 +1,18 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+/**	
+	Copyright 2016 IBM Corp.
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+	
+	http://www.apache.org/licenses/LICENSE-2.0
+	
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+	**/
 package com.uit.daa.issuer.Models;
 
 import com.uit.daa.issuer.Controllers.Config;
@@ -19,32 +29,40 @@ import org.springframework.jdbc.core.JdbcTemplate;
  *
  * @author nguyenduyy
  */
-public class Service {
-    public String service_name;
-    public String service_permission;
-    public Member member;
-    public Integer id;
+public class Service extends MemberInfo {
+    public final static String[] fieldSet = { C.CL_SERNAME, C.CL_SERVICE_ACCOUNT};
     public ResultSet resultSet;
     
+    
+    public Service(Member m){
+        this.member = m;
+        initData();
+    }
     public Service(){
-        
+        initData();
     }
-    public Service(Member m,String name,String permission ){
-        service_name = name;
-        service_permission = permission;
-        member = m;
-                
+    private void initData(){
+        for(int i=0; i< fieldSet.length; i++){
+            infoMap.put(fieldSet[i], "");
+        }
     }
+    
     public void save(JdbcTemplate j) throws SQLException{
-          ManipulateQueryHelper qh = new ManipulateQueryHelper();
+        ManipulateQueryHelper qh = new ManipulateQueryHelper();
         qh.addTableName(C.TB_SERVICE);
-        qh.addColumnName(C.CL_SERNAME,C.CL_PERMISSION, C.CL_M_ID);
+        for(int i=0; i<fieldSet.length; i++){
+            qh.addColumnName(fieldSet[i]);
+        }
+        qh.addColumnName(C.CL_M_ID);
         String sql = qh.getInsertSQL();
         if(sql != null){
         PreparedStatement pp = (PreparedStatement) j.getDataSource().getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        pp.setString(1, service_name);
-        pp.setString(2, service_permission);
-        pp.setInt(3, member.id);
+        int i = 0;
+        for(i=0; i< fieldSet.length; i++){
+            pp.setString(i+1,infoMap.get(fieldSet[i]) );
+        }
+        
+        pp.setInt(i+1, member.id);
         pp.executeUpdate();
         ResultSet gk = pp.getGeneratedKeys();
             if(gk.next()){
@@ -63,13 +81,15 @@ public class Service {
             Service a = new Service();
             a.member = new Member();
             a.member.id = rs.getInt(C.CL_M_ID);
-            a.member.curve = BNCurve.createBNCurveFromName(Config.curveName);
+            a.member.curve = BNCurve.createBNCurveFromName("TPM_ECC_BN_P256");
             a.member.epk = rs.getBytes(C.CL_EPK);
             a.member.esk = rs.getBytes(C.CL_ESK);
             a.member.M = rs.getString(C.CL_M);
             a.id =id;
-            a.service_name = rs.getString(C.CL_SERNAME);
-            a.service_permission = rs.getString(C.CL_PERMISSION);
+            for(int i=0; i< User.fieldSet.length; i++){
+               a.setInfo(User.fieldSet[i], rs.getString(User.fieldSet[i]));
+            }
+            
             a.resultSet = rs;
             return a;
             
@@ -94,9 +114,16 @@ public class Service {
             a.member.esk = rs.getBytes(C.CL_ESK);
             a.member.M = rs.getString(C.CL_M);
             a.id =id;
-            a.service_name = rs.getString(C.CL_SERNAME);
-            a.service_permission = rs.getString(C.CL_PERMISSION);
+            Level l = new Level();
+            l.getFromLevelID(j,rs.getInt(C.CL_SERVICE_LEVEL));
+            String[] fs = Service.fieldSet;
+            for(int i=0; i< fs.length; i++){
+                String f = fs[i];
+                a.setInfo(f, rs.getString(f));
+            }
+            
             a.resultSet = rs;
+            
             return a;
             
         }
@@ -104,5 +131,5 @@ public class Service {
             return null;
         }
     }
-    
+        
 }

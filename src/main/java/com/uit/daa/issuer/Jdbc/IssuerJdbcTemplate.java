@@ -13,6 +13,7 @@ import com.uit.daa.issuer.Models.Issuer;
 import com.uit.daa.issuer.Models.Issuer.JoinMessage1;
 import com.uit.daa.issuer.Models.Issuer.JoinMessage2;
 import com.uit.daa.issuer.Models.Member;
+import com.uit.daa.issuer.Models.MemberType;
 import com.uit.daa.issuer.Models.Nonce;
 import com.uit.daa.issuer.Models.User;
 import com.uit.daa.issuer.Models.Verifier;
@@ -103,7 +104,11 @@ public class IssuerJdbcTemplate {
         user.addColumn(new Column().setToDefaultIdField());
         user.addColumn(new Column(C.CL_NAME,Column.DataTypeEnum.TEXT,"name"));
         user.addColumn(new Column(C.CL_JOB,Column.DataTypeEnum.TEXT,"job"));
+        user.addColumn(new Column(C.CL_USER_ACCOUNT,Column.DataTypeEnum.TEXT,"bank account"));
+        user.addColumn(new Column(C.CL_USER_DRIVE,Column.DataTypeEnum.TEXT,"expire date"));
+        user.addColumn(new Column(C.CL_USER_LEVEL, Column.DataTypeEnum.TEXT,"list of level id "));
         user.addColumn(new Column(C.CL_M_ID,Column.DataTypeEnum.BIGINT,"member id"));
+        
         user.addColumn(new Column().setToDefaultTimeStampWithName(C.CL_CREATETIME));
        
         jdbcTemplate.execute(user.getCreateTableSql());
@@ -114,23 +119,14 @@ public class IssuerJdbcTemplate {
         Table service  = new Table(C.TB_SERVICE);
         service.addColumn(new Column().setToDefaultIdField());
         service.addColumn(new Column(C.CL_SERNAME,Column.DataTypeEnum.TEXT,"name"));
-        service.addColumn(new Column(C.CL_PERMISSION,Column.DataTypeEnum.TEXT,"job"));
+        service.addColumn(new Column(C.CL_SERVICE_LEVEL,Column.DataTypeEnum.TEXT,"job"));
+        service.addColumn(new Column(C.CL_SERVICE_ACCOUNT,Column.DataTypeEnum.TEXT,"service bank account"));
         service.addColumn(new Column(C.CL_M_ID,Column.DataTypeEnum.BIGINT,"member id"));
         service.addColumn(new Column().setToDefaultTimeStampWithName(C.CL_CREATETIME));
          jdbcTemplate.execute(service.getCreateTableSql());
         
         }
-        rs = metaData.getTables(null, null,C.TB_LEVEL,null);
-        if(!rs.next()){
-        Table level  = new Table(C.TB_LEVEL);
-        level.addColumn(new Column().setToDefaultIdField());
-        level.addColumn(new Column(C.CL_FIELD,Column.DataTypeEnum.TEXT,"field"));
-        level.addColumn(new Column(C.CL_CODE,Column.DataTypeEnum.INT,"id"));
-        level.addColumn(new Column(C.CL_LEVEL,Column.DataTypeEnum.INT,"level "));
-        level.addColumn(new Column().setToDefaultTimeStampWithName(C.CL_CREATETIME));
-          jdbcTemplate.execute(level.getCreateTableSql());
         
-        }
         rs = metaData.getTables(null, null,C.TB_CONFIG,null);
         if(!rs.next()){       
         Table config  = new Table(C.TB_CONFIG);
@@ -153,12 +149,33 @@ public class IssuerJdbcTemplate {
         nonce.addColumn(new Column().setToDefaultTimeStampWithName(C.CL_CREATETIME));
         jdbcTemplate.execute(nonce.getCreateTableSql());
         }
+        rs = metaData.getTables(null, null, C.TB_LEVEL,null);
+        if(!rs.next()){
+            Table level = new Table(C.TB_LEVEL);
+            level.addColumn(new Column().setToDefaultIdField());
+            level.addColumn(new Column(C.CL_LEVEL_NAME,Column.DataTypeEnum.TEXT));
+            level.addColumn(new Column(C.CL_LEVEL_PERMISSION,Column.DataTypeEnum.TEXT,"permisions"));
+            level.addColumn(new Column(C.CL_LEVEL_SENDER,Column.DataTypeEnum.INT,"membertype id"));
+            level.addColumn(new Column(C.CL_LEVEL_RECIEVER,Column.DataTypeEnum.INT,"membertype id"));
+            level.addColumn(new Column().setToDefaultTimeStampWithName(C.CL_CREATETIME));
+            jdbcTemplate.execute(level.getCreateTableSql());
+        }
              
-       addExampleData();
+       //addExampleData();
 
         
         
     }
+
+    public void addConfigTable() throws NoSuchAlgorithmException, SQLException {
+        ManipulateQueryHelper qh = new ManipulateQueryHelper();
+        qh.addTableName(C.TB_CONFIG);
+        qh.addColumnName(C.CL_ISK, C.CL_IPK, C.CL_BNCURVE, C.CL_MAXJOIN);
+        String sql = qh.getInsertSQL();
+        System.out.println("add config table result: "+sql);
+    }
+
+
     private void addExampleData() throws NoSuchAlgorithmException, SQLException{
         //config
         String curveName = "TPM_ECC_BN_P256";
@@ -191,10 +208,50 @@ public class IssuerJdbcTemplate {
             
             pp2.setString(1, "service");
             pp2.executeUpdate();
+            pp2.setString(1, "bank");
+            pp2.executeUpdate();
+            pp2.setString(1, "police" );
+            pp2.executeUpdate();
             pp2.close();
             
         }
-        
+         mq = new ManipulateQueryHelper();
+        mq.addTableName(C.TB_LEVEL);
+        mq.addColumnName(C.CL_LEVEL_NAME);
+        mq.addColumnName(C.CL_LEVEL_PERMISSION);
+        mq.addColumnName(C.CL_LEVEL_SENDER);
+        mq.addColumnName(C.CL_LEVEL_RECIEVER);
+        sql = mq.getInsertSQL();
+        if(sql != null){
+            PreparedStatement pp2= (PreparedStatement) dataSource.getConnection().prepareStatement(sql);
+            pp2.setString(1, "level_1"); // for normal people
+            pp2.setString(2, "user_name");
+            pp2.setInt(3,MemberType.USER_TYPE);
+            pp2.setInt(4,MemberType.USER_TYPE);
+            pp2.executeUpdate();
+            pp2.setString(1, "level_service"); //for service
+            pp2.setString(2, "user_name,user_job");
+            pp2.setInt(3,MemberType.SERVICE_TYPE);
+            pp2.setInt(4,MemberType.USER_TYPE);
+            pp2.executeUpdate();
+            pp2.setString(1, "level_bank"); // for bank
+            pp2.setString(2, "user_account,user_name");
+            pp2.setInt(3,MemberType.BANK_TYPE);
+            pp2.setInt(4,MemberType.USER_TYPE);
+            pp2.executeUpdate();
+            pp2.setString(1, "level_police"); // for police
+            pp2.setString(2, "user_name,user_job,user_drive_expire");
+            pp2.setInt(3,MemberType.POLICE_TYPE);
+            pp2.setInt(4,MemberType.USER_TYPE);
+            pp2.executeUpdate();
+            pp2.setString(1, "level_customer"); // for customer
+            pp2.setString(2, "service_name,service_level,service_account");
+            pp2.setInt(3,MemberType.USER_TYPE);
+            pp2.setInt(4,MemberType.SERVICE_TYPE);
+            pp2.executeUpdate();
+            pp2.close();
+            
+        }
         //Member
         //Member m = new Member("LoveCat",curve, 1);
         //m.save(jdbcTemplate);
@@ -209,56 +266,6 @@ public class IssuerJdbcTemplate {
         
     }
     
-    public void testScript() throws SQLException, NoSuchAlgorithmException, IOException, JSONException{
-        String res = "";
-        //Submit data
-        
-        String PIN = "LoveCat";
-        Integer appId = 1;
-        String deviceId = "ASUS ZenFone";
-        Integer memberId = 1;
-        org.json.JSONObject json = new JSONObject().put(C.CL_NAME, "Thanh Uyen");
-        
-        //Retrive data
-        Issuer i = Issuer.getFromID(jdbcTemplate);
-        Member member = Member.getFromID(jdbcTemplate,memberId );
-        User user = User.getFromMemberID(jdbcTemplate, memberId);
-        //Simulate
-        SecureRandom random = new SecureRandom();
-        BigInteger gsk = member.curve.getRandomModOrder(random);
-        Authenticator auth = new Authenticator(member.curve, i.pk,gsk);
-        boolean trust_member = true;
-        Iterator<String> keys = json.keys();
-        while(keys.hasNext()){
-            String k = (String)keys.next();
-            trust_member &= user.contain(k, json.getString(k));
-        }
-        
-        if(trust_member){
-            res += "trusted \n";
-            boolean success = true;
-            BigInteger nonce = i.getCurve().getRandomModOrder(random);
-            JoinMessage1 jm1 = auth.EcDaaJoin1(nonce);
-            JoinMessage2 jm2 = i.EcDaaIssuerJoin(jm1, false);
-            success &= auth.EcDaaJoin2(jm2);
-            Authenticator.EcDaaSignature sig = auth.EcDaaSign("Coffee",json.getString(C.CL_NAME));
-            //Verify
-            Verifier v = new Verifier(i.getCurve());
-            boolean valid = v.verify(sig, "Coffees", i.pk, null);
-            if(valid){
-                res+="valid\n";
-            }
-            else{
-                res+="invalid\n";
-            }
-            
-        }
-        else{
-            res+="untrusted\n";
-        }
-        System.out.println(res);
-        
-    }
     
     public Member getMember(Integer appId, String M) throws SQLException{
         SelectQueryHelper sq = new SelectQueryHelper();

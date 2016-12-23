@@ -319,7 +319,7 @@ public class IssuerController {
             Verifier ver  = new Verifier(curve);
             return ver.link(sig1, sig2);
     }
-    
+    /*
     @RequestMapping("/test")
     public ModelAndView test() throws SQLException, NoSuchAlgorithmException{
         prepare();
@@ -339,19 +339,9 @@ public class IssuerController {
         
         issuer_auth.EcDaaJoin2(issuer.EcDaaIssuerJoin(issuer_auth.EcDaaJoin1(issuer.GetNonce())));
         BigInteger sessionId = curve.getRandomModOrder(random);
-        Authenticator.EcDaaSignature permission_sig = service_auth.EcDaaSignWrt(
-                sessionId.toByteArray(),
-                C.CL_PERMISSION, sessionId.toString());
-        /*service_auth.sk = curve.getRandomModOrder(random);
-        Authenticator.EcDaaSignature permission_sig_fake = service_auth.EcDaaSignWithNym(
-                C.CL_PERMISSION, service.service_permission,"sessionId");
-        Authenticator.EcDaaSignature rogue_sig = new Authenticator.EcDaaSignature(
-                permission_sig.r, permission_sig.s,
-                permission_sig.t, permission_sig.w, 
-                permission_sig.c2, permission_sig_fake.s2, permission_sig.krd);
-        Authenticator.EcDaaSignature session_sig = service_auth.EcDaaSignWithNym(
-                C.CL_PERMISSION, "sessionNumber","sessionId");
-                */
+        Authenticator.EcDaaSignature permission_sig = service_auth.EcDaaSignWrt(sessionId.toByteArray(),
+                C.CL_SERVICE_LEVEL, sessionId.toString());
+        
                
         Authenticator.EcDaaSignature job_sig = user_auth.EcDaaSign(C.CL_JOB,user.job);
         String job_cert = createCertificate(issuer, 
@@ -360,8 +350,7 @@ public class IssuerController {
         Verifier  v = new Verifier(curve);
         boolean valid_ser = true;
         boolean valid_user = true;
-        valid_ser &= verifyEcDaaSigWrt(
-                issuer,DirtyWork.bytesToHex(permission_sig.encode(curve)),sessionId.toString(),C.CL_PERMISSION,
+        valid_ser &= verifyEcDaaSigWrt(issuer,DirtyWork.bytesToHex(permission_sig.encode(curve)),sessionId.toString(),C.CL_SERVICE_LEVEL,
                 service.service_permission.getBytes(), sessionId.toByteArray());
         
         valid_user &= verifyEcDaaSig(issuer,DirtyWork.bytesToHex(job_sig.encode(curve)),user.job,C.CL_JOB);
@@ -412,7 +401,7 @@ public class IssuerController {
         
         
         
-    }   
+    }   */
  
     
 }

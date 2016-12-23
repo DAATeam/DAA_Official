@@ -14,7 +14,7 @@ import com.uit.daa.issuer.Controllers.Validator.addServiceData;
 import com.uit.daa.issuer.Controllers.Validator.addUserData;
 import com.uit.daa.issuer.Controllers.Validator.buildAppData;
 import com.uit.daa.issuer.Controllers.Validator.buildMemberData;
-import com.uit.daa.issuer.Controllers.Validator.buildUserData;
+
 import com.uit.daa.issuer.Jdbc.IssuerJdbcTemplate;
 import com.uit.daa.issuer.Models.App;
 import com.uit.daa.issuer.Models.Issuer;
@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import org.json.JSONException;
@@ -76,7 +77,7 @@ public class AdminController {
         }
         res.getWriter().println(json.toString());
     }
-    @RequestMapping(value="//admin/addService", method = RequestMethod.POST)
+    @RequestMapping(value="/admin/addService", method = RequestMethod.POST)
     public void addService(HttpServletResponse res,
             @ModelAttribute("addServiceData") @Valid addServiceData data,
             BindingResult result) throws JSONException, SQLException, IOException, NoSuchAlgorithmException{
@@ -144,6 +145,7 @@ public class AdminController {
             bais.close();
             out.flush();
             }catch(Exception e){
+                Logger.getLogger(buildAppData.class.getName()).log(java.util.logging.Level.SEVERE, null, e);
                 res.sendRedirect("/welcome");
             }
             
