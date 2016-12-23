@@ -125,6 +125,7 @@ public class Level {
                 String p = rs.getString(C.CL_LEVEL_NAME);
                 map.put(mid, p);
             }while(rs.next());
+            
             return map;
         }else return null;
         

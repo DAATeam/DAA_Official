@@ -81,7 +81,7 @@ public class AppFileBuilder {
             json.put("appId", appId);
             json.put("curve", curve);
             //json.put("esk", esk);
-            //json.put("ipk",ipk);
+            json.put("ipk",ipk);
             for(AppFileField f : fields){
                 json = f.putToJSONObject(json);
             }

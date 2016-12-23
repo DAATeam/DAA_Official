@@ -7,6 +7,7 @@ package com.uit.daa.issuer.Controllers.Validator;
 
 import com.uit.daa.issuer.Controllers.Config;
 import com.uit.daa.issuer.Controllers.DirtyWork;
+import com.uit.daa.issuer.Jdbc.C;
 import com.uit.daa.issuer.Models.App;
 import com.uit.daa.issuer.Models.AppFileBuilder;
 import com.uit.daa.issuer.Models.AppFileField;
@@ -131,6 +132,8 @@ public class buildAppData {
             aff.setGsk(gsk.toString());
             
             tmp.put("expire_date",expire_date.toString());
+            tmp.put(C.CL_M_TYPE_ID,mi.getMember().type);
+            
             jm2 = issuer.createStaticCredential(gsk, tmp.toString().getBytes());
             aff.setCredential(jm2.toJson(curve));
             aff.setValue(tmp.toString());
@@ -165,6 +168,9 @@ public class buildAppData {
         }
         AppFileBuilder afb = new AppFileBuilder();
         afb.setFields(aaff);
+        afb.setAppId(appId);
+        afb.setCurve(curve.getName());
+        afb.setIpk(issuer.pk.toJSON(curve));
         String r = afb.toJSON();
         return r;
         
