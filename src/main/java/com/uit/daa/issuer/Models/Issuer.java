@@ -103,14 +103,17 @@ public class Issuer {
 	public static class IssuerSecretKey {
 		public BigInteger x;
 		public BigInteger y;
+                
 		public static final String
 			JSON_NAME = "EcDaaIssuerSecretKey",
 			JSON_x = "x",
-			JSON_y = "y";
+			JSON_y = "y",
+                        JSON_z = "z";
 
 		public IssuerSecretKey(BigInteger x, BigInteger y) {
 			this.x = x;
 			this.y = y;
+                        
 		}
 		
 		public IssuerSecretKey(BNCurve curve, String json) {
@@ -285,6 +288,7 @@ public class Issuer {
 	 */
 	public static IssuerSecretKey createIssuerKey(BNCurve curve, SecureRandom random) {
 		return new IssuerSecretKey(
+                               
 				curve.getRandomModOrder(random),
 				curve.getRandomModOrder(random));
 	}
@@ -526,13 +530,19 @@ public class Issuer {
          */
         public JoinMessage2 createStaticCredential(BigInteger gsk, byte[] info) throws NoSuchAlgorithmException{
             BigInteger l = this.curve.hashModOrder(info);
-            ECPoint Q = this.curve.getG1().multiplyPoint(gsk);
-            ECPoint a = this.curve.getG1().multiplyPoint(l);
-            ECPoint b = a.multiplyPoint(this.sk.y);
-            ECPoint c = a.multiplyPoint(this.sk.x).addPoint(Q.multiplyPoint(this.sk.x.multiply(this.sk.y).multiply(l).mod(this.curve.getOrder()))); // c = a^x * Q^{xyl}
-            ECPoint d =Q.multiplyPoint(l.multiply(this.sk.y).mod(this.curve.getOrder()));
+            BigInteger r = this.curve.getRandomModOrder(random);
+                        
+            ECPoint Q = this.curve.getG1().multiplyPoint(gsk).multiplyPoint(l);
+            ECPoint Q1 = this.curve.getG1().multiplyPoint(gsk);
+            ECPoint a = this.curve.getG1().multiplyPoint(r);
             
-            BigInteger t = l.multiply(this.sk.y).mod(this.curve.getOrder());
+            ECPoint b = a.multiplyPoint(this.sk.y);
+            
+            ECPoint c = a.multiplyPoint(this.sk.x).addPoint(Q.multiplyPoint(this.sk.x.multiply(this.sk.y).multiply(r).mod(this.curve.getOrder()))); // c = a^x * Q^{xyl}
+            
+            ECPoint d =Q1.multiplyPoint(r.multiply(this.sk.y).mod(this.curve.getOrder()));
+            
+            BigInteger t = r.multiply(this.sk.y).mod(this.curve.getOrder());
 		BigInteger r2 = this.curve.getRandomModOrder(random);
 		ECPoint u2 = this.curve.getG1().multiplyPoint(r2);
 		ECPoint v2 = Q.multiplyPoint(r2);
@@ -542,7 +552,7 @@ public class Issuer {
 				this.curve.point1ToBytes(this.curve.getG1()),
 				this.curve.point1ToBytes(b),
 				this.curve.point1ToBytes(Q),
-				this.curve.point1ToBytes(d));
+				this.curve.point1ToBytes(d.multiplyPoint(l)));
 		BigInteger s2 = (r2.add(c2.multiply(t).mod(this.curve.getOrder()))).mod(this.curve.getOrder());
                 return new JoinMessage2(a,b,c,d,c2,s2);
         }

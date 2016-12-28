@@ -319,89 +319,42 @@ public class IssuerController {
             Verifier ver  = new Verifier(curve);
             return ver.link(sig1, sig2);
     }
-    /*
+    
     @RequestMapping("/test")
-    public ModelAndView test() throws SQLException, NoSuchAlgorithmException{
+    public void test(HttpServletResponse res) throws SQLException, NoSuchAlgorithmException, IOException{
         prepare();
-        ModelAndView mav = new ModelAndView("test");
+        //ModelAndView mav = new ModelAndView("test");
         Map<String, String> map;
         BNCurve curve  = BNCurve.createBNCurveFromName(Config.curveName);
-        Member muser = new Member("LovelyGirl",curve,MemberType.USER_TYPE);
-        Member mservice = new Member("theCoffeeHouse", BNCurve.createBNCurveFromName(Config.curveName), MemberType.SERVICE_TYPE);
-        User user = new User(muser,"Thanh Uyen","Manager");
-        Service  service= new Service(mservice,"TheCofeeHouse","user_job");
-        Authenticator user_auth = new Authenticator(curve, issuer.pk);
-        Authenticator service_auth = new Authenticator(curve, issuer.pk);
-        Authenticator issuer_auth = new Authenticator(curve, issuer.pk,issuer.getSk().x);
-        Issuer.JoinMessage2 jm2_tmp = issuer.EcDaaIssuerJoinWrtInfo(user_auth.EcDaaJoin1(issuer.GetNonce()), user.name.getBytes(), false);
-        user_auth.EcDaaJoin2(jm2_tmp);
-        service_auth.EcDaaJoin2(issuer.EcDaaIssuerJoinWrtInfo(service_auth.EcDaaJoin1(issuer.GetNonce()), service.service_permission.getBytes(), false));
+        //create a member secret ket
+        BigInteger gsk = curve.getRandomModOrder(random);
+        String info = "original info";
+        String fake_info = "fake info";
+        Issuer.JoinMessage2 jm2 = issuer.createStaticCredential(gsk, info.getBytes());
+        //create member's AUthenticator
+        Authenticator auth  = new Authenticator(curve, issuer.pk, gsk);
+        auth.joinState = Authenticator.JoinState.IN_PROGRESS;
+        auth.EcDaaJoin2Wrt(jm2,info);
+        //create a Signature
+        String session = "thisIsASessionId";
+        String basename = "testing";
+        Authenticator.EcDaaSignature sig = auth.EcDaaSignWrt(fake_info.getBytes(),basename, session);
+        //verify sig
+        Verifier verifier = new Verifier(curve);
+        boolean b = verifier.verifyWrt(info.getBytes(),session.getBytes(), sig, basename, issuer.pk, null);
+        boolean b1 = verifier.verifyWrt(fake_info.getBytes(),session.getBytes(), sig, basename, issuer.pk, null);
+        //response
+        String response = "";
+        response += "Original: ";
+        if(b) response += "OK";
+        else response += "Fail";
+        response+="\nFake: ";
+        if(b1) response += "OK";
+        else response += "Fail";
         
-        issuer_auth.EcDaaJoin2(issuer.EcDaaIssuerJoin(issuer_auth.EcDaaJoin1(issuer.GetNonce())));
-        BigInteger sessionId = curve.getRandomModOrder(random);
-        Authenticator.EcDaaSignature permission_sig = service_auth.EcDaaSignWrt(sessionId.toByteArray(),
-                C.CL_SERVICE_LEVEL, sessionId.toString());
+        res.getOutputStream().println(response);
         
-               
-        Authenticator.EcDaaSignature job_sig = user_auth.EcDaaSign(C.CL_JOB,user.job);
-        String job_cert = createCertificate(issuer, 
-                DirtyWork.bytesToHex(job_sig.encode(curve)));
-        
-        Verifier  v = new Verifier(curve);
-        boolean valid_ser = true;
-        boolean valid_user = true;
-        valid_ser &= verifyEcDaaSigWrt(issuer,DirtyWork.bytesToHex(permission_sig.encode(curve)),sessionId.toString(),C.CL_SERVICE_LEVEL,
-                service.service_permission.getBytes(), sessionId.toByteArray());
-        
-        valid_user &= verifyEcDaaSig(issuer,DirtyWork.bytesToHex(job_sig.encode(curve)),user.job,C.CL_JOB);
-        valid_user &= verifyEcDaaSig(issuer,job_cert,DirtyWork.bytesToHex(job_sig.encode(curve)), CERT_BASENAME);
-        
-       
-        mav.addObject("verify_service", valid_ser);
-        mav.addObject("verify_user",valid_user);
-        mav.addObject("user_name", user.name);
-        mav.addObject("user_job",user.job);
-        mav.addObject("service_name", service.service_name);
-        mav.addObject("service_permission",service.service_permission);
-        mav.addObject("user_esk",(new BigInteger(user.member.esk)).toString());
-        mav.addObject("user_epk", DirtyWork.bytesToHex(user.member.epk));
-        mav.addObject("service_esk",(new BigInteger(service.member.esk)).toString());
-        mav.addObject("service_epk", DirtyWork.bytesToHex(service.member.epk));
-        mav.addObject("user_job_cert",job_cert);
-        //mav.addObject("service_permission_cert",permission_cert);
-        
-        //test share key
-        ECPoint usharekey = issuer.pk.X.multiplyPoint(new BigInteger(user.member.esk));
-        ECPoint user_pk  = curve.getG2().multiplyPoint(new BigInteger(user.member.esk));
-        ECPoint isharekey = user_pk.multiplyPoint(issuer.getSk().x);
-        mav.addObject("user_share_key",DirtyWork.bytesToHex(usharekey.encodePoint()));
-        mav.addObject("issuer_share_key_with_user", DirtyWork.bytesToHex(isharekey.encodePoint()));
-        boolean correct = usharekey.getCoordinate().getX().getField().getCardinality()
-                .equals(isharekey.getCoordinate().getX().getField().getCardinality());
-        
-        
-        try{
-        BigInteger k = isharekey.getCoordinate().getX().getField().getCardinality();
-        SecretKeySpec key = BitKeySelector.getDES56Key(k.toByteArray());
-        DESEncryptor des = new DESEncryptor(key);
-        
-        String e = des.encrypt("plaintext");
-        String d = des.decrypt(e);
-        mav.addObject("ciphertext",e);
-        mav.addObject("plaintext",d);
-        correct &= d.equals("plaintext");
-        }
-        catch(Exception e){
-            mav.addObject("ciphertext",e.getCause());
-            mav.addObject("plaintext",e.getMessage());
-        }
-        
-        mav.addObject("correct_share_key",correct);
-        return mav;
-        
-        
-        
-    }   */
+    } 
  
     
 }

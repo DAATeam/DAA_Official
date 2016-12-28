@@ -88,12 +88,13 @@ public class Verifier {
         
         public boolean verifyWrt(byte[] message, byte[] session,EcDaaSignature signature, String appId, IssuerPublicKey pk, Set<BigInteger> revocationList) throws NoSuchAlgorithmException {
             BigInteger l = this.curve.hashModOrder(message);
-            ECPoint a  = this.curve.getG1().multiplyPoint(l);
+            //ECPoint a  = this.curve.getG1().multiplyPoint(l);
             BigInteger h = this.curve.hashModOrder(session);
-            ECPoint r = a.multiplyPoint(h);
+            //ECPoint r = a.multiplyPoint(h);
             boolean success = true;
-            success &= (signature.r.getCoordinate().getX().getField().getCardinality() == r.getCoordinate().getX().getField().getCardinality());
-            success &= (signature.r.getCoordinate().getY().getField().getCardinality() == r.getCoordinate().getY().getField().getCardinality());
+        //    success &= (signature.r.getCoordinate().getX().getField().getCardinality() == r.getCoordinate().getX().getField().getCardinality());
+        //    success &= (signature.r.getCoordinate().getY().getField().getCardinality() == r.getCoordinate().getY().getField().getCardinality());
+            signature.w = signature.w.multiplyPoint(l);
             if(success){
                 return verify(signature, appId, pk, revocationList);
             }
