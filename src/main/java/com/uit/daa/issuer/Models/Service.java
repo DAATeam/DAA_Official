@@ -40,6 +40,7 @@ public class Service extends MemberInfo {
     }
     public Service(){
         initData();
+        this.member = new Member();
     }
     private void initData(){
         for(int i=0; i< fieldSet.length; i++){

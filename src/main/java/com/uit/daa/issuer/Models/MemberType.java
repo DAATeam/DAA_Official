@@ -41,6 +41,7 @@ public class MemberType {
         String sql= mq.getInsertSQL();
         PreparedStatement ps = (PreparedStatement) j.getDataSource().getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setString(1, prefix);
+        ps.executeUpdate();
         ResultSet rs = ps.getGeneratedKeys();
         if(rs.next()){
             this.id = rs.getInt(1);
@@ -65,4 +66,21 @@ public class MemberType {
             return null;
         }
     }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+    
 }

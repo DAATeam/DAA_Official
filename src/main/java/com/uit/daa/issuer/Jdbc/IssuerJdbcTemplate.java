@@ -12,9 +12,11 @@ import com.uit.daa.issuer.Models.Authenticator;
 import com.uit.daa.issuer.Models.Issuer;
 import com.uit.daa.issuer.Models.Issuer.JoinMessage1;
 import com.uit.daa.issuer.Models.Issuer.JoinMessage2;
+import com.uit.daa.issuer.Models.Level;
 import com.uit.daa.issuer.Models.Member;
 import com.uit.daa.issuer.Models.MemberType;
 import com.uit.daa.issuer.Models.Nonce;
+import com.uit.daa.issuer.Models.Service;
 import com.uit.daa.issuer.Models.User;
 import com.uit.daa.issuer.Models.Verifier;
 import com.uit.daa.issuer.Models.crypto.BNCurve;
@@ -38,6 +40,8 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
+import sun.util.resources.cldr.el.CalendarData_el_CY;
+import sun.util.resources.cldr.pl.CalendarData_pl_PL;
 
 /**
  *
@@ -321,5 +325,71 @@ public class IssuerJdbcTemplate {
          Nonce nonce = new Nonce(n, appId);
          nonce.save(jdbcTemplate);
          return nonce;
+    }
+    public ArrayList<User> getALlUserMember() throws SQLException{
+        SelectQueryHelper sqh = new SelectQueryHelper();
+        sqh.addTableName(C.TB_USER);
+        sqh.addColumnName("*");
+        PreparedStatement pp = (PreparedStatement) dataSource.getConnection().prepareStatement(sqh.getSelectSQL());
+        ResultSet rs = pp.executeQuery();
+        ArrayList<User> au = new ArrayList<>();
+        while(rs.next()){
+            User u = new User();
+            u.setId(rs.getInt(C.CL_ID));
+            u.getMember().id = rs.getInt(C.CL_M_ID);
+            for(String tag :  User.fieldSet){
+                u.setInfo(tag, rs.getString(tag));
+            }
+            au.add(u);
+            
+        }
+        return au;
+    }
+    public ArrayList<Service> getALlServiceMember() throws SQLException{
+        SelectQueryHelper sqh = new SelectQueryHelper();
+        sqh.addTableName(C.TB_SERVICE);
+        sqh.addColumnName("*");
+        PreparedStatement pp = (PreparedStatement) dataSource.getConnection().prepareStatement(sqh.getSelectSQL());
+        ResultSet rs = pp.executeQuery();
+        ArrayList<Service> au = new ArrayList<>();
+        while(rs.next()){
+            Service u = new Service();
+            u.setId(rs.getInt(C.CL_ID));
+            u.getMember().id = rs.getInt(C.CL_M_ID);
+            for(String tag :  Service.fieldSet){
+                u.setInfo(tag, rs.getString(tag));
+            }
+            au.add(u);
+            
+        }
+        return au;
+    }
+    public ArrayList<Level> getAllLevel() throws SQLException{
+       String sql ="select level_name, level_permission, A.mprefix as msender , B.mprefix as mreceiver from levels as L, member_types as A, member_types as B where L.sender = A._id and L.receiver = B._id";
+        PreparedStatement pp = (PreparedStatement) dataSource.getConnection().prepareStatement(sql);
+        ResultSet rs = pp.executeQuery();
+        ArrayList<Level> al = new ArrayList<>();
+        while(rs.next()){
+            Level l = new Level();
+            l.setLevel_name(rs.getString(C.CL_LEVEL_NAME));
+            l.setLevel_permission(rs.getString(C.CL_LEVEL_PERMISSION));
+            l.getMreceiver().prefix = rs.getString("mreceiver");
+            l.getMsender().prefix = rs.getString("msender");
+            al.add(l);
+        }
+        return al;
+    }
+    public  ArrayList<MemberType> getAllMemberType() throws SQLException{
+        String sql = "select * from "+C.TB_M_TYPE;
+        PreparedStatement pp = (PreparedStatement) dataSource.getConnection().prepareStatement(sql);
+        ResultSet rs = pp.executeQuery();
+        ArrayList<MemberType> am = new ArrayList<>();
+        while(rs.next()){
+            MemberType m = new MemberType();
+            m.setId(rs.getInt(C.CL_ID));
+            m.setPrefix(rs.getString(C.CL_M_TYPE_PREFIX));
+            am.add(m);
+        }
+        return am;
     }
 }

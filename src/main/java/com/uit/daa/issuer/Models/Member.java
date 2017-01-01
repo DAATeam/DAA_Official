@@ -98,5 +98,22 @@ public class Member {
         type = rs.getInt(C.CL_M_TYPE_ID);
         return this;
     }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+    
     
 }

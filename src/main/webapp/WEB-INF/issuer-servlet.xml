@@ -39,6 +39,19 @@
         <!--<bean id="log" class = "com.uit.daa.issuer.AspectJ.Log"></bean> -->
         
         <mvc:annotation-driven />
+        
+        <bean
+	class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	<property name="prefix">
+		<value>/WEB-INF/jsp/</value>
+	</property>
+	<property name="suffix">
+		<value>.jsp</value>
+	</property>
+    </bean>
+        <mvc:resources mapping="/resources/**" location="/resources/"/>
+
+
 
 	 
 </beans>

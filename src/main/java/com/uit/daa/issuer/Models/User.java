@@ -31,6 +31,7 @@ public class User extends MemberInfo{
     }
     public User(){
         initData();
+        this.member = new Member();
     }
     private void initData(){
         for(int i=0; i< fieldSet.length; i++){

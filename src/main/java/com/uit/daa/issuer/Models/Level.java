@@ -24,9 +24,12 @@ public class Level {
     Integer senderType;
     Integer recieverType;
     Integer id;
+    MemberType msender;
+    MemberType mreceiver;
 
     public Level() {
-        
+        msender = new MemberType();
+        mreceiver = new MemberType();
     }
     
 
@@ -150,6 +153,23 @@ public class Level {
         else return null;
             
     }
+
+    public MemberType getMsender() {
+        return msender;
+    }
+
+    public void setMsender(MemberType msender) {
+        this.msender = msender;
+    }
+
+    public MemberType getMreceiver() {
+        return mreceiver;
+    }
+
+    public void setMreceiver(MemberType mreceiver) {
+        this.mreceiver = mreceiver;
+    }
+    
     
     
     

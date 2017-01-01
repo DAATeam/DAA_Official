@@ -36,11 +36,15 @@ public class App {
         qh.addColumnName(C.CL_M_ID, C.CL_DEVICEID);
         String sql = qh.getInsertSQL();
         if(sql != null){
-        PreparedStatement pp = (PreparedStatement) j.getDataSource().getConnection().prepareStatement(sql);
+        PreparedStatement pp = (PreparedStatement) j.getDataSource().getConnection().prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
         pp.setInt(1, M.id);
         //pp.setIn(2, appID);
         pp.setString(2, deviceID);
         pp.executeUpdate();
+        ResultSet gk = pp.getGeneratedKeys();
+            if(gk.next()){
+                this.appID = gk.getInt(1);
+            }
         pp.close();
         }
     }

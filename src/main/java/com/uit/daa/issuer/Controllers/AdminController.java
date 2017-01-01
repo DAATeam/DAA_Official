@@ -10,22 +10,30 @@ import static com.uit.daa.issuer.Controllers.IssuerController.MESSAGE;
 import static com.uit.daa.issuer.Controllers.IssuerController.OK;
 import static com.uit.daa.issuer.Controllers.IssuerController.STATUS;
 import com.uit.daa.issuer.Controllers.Validator.addAppData;
+import com.uit.daa.issuer.Controllers.Validator.addMTypeData;
 import com.uit.daa.issuer.Controllers.Validator.addServiceData;
 import com.uit.daa.issuer.Controllers.Validator.addUserData;
 import com.uit.daa.issuer.Controllers.Validator.buildAppData;
 import com.uit.daa.issuer.Controllers.Validator.buildMemberData;
+import com.uit.daa.issuer.Jdbc.C;
 
 import com.uit.daa.issuer.Jdbc.IssuerJdbcTemplate;
+import com.uit.daa.issuer.Jdbc.ManipulateQueryHelper;
 import com.uit.daa.issuer.Models.App;
 import com.uit.daa.issuer.Models.Issuer;
+import com.uit.daa.issuer.Models.Level;
 import com.uit.daa.issuer.Models.Member;
+import com.uit.daa.issuer.Models.MemberType;
+import com.uit.daa.issuer.Models.Service;
 import com.uit.daa.issuer.Models.User;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -59,65 +67,86 @@ public class AdminController {
             issuer = ijt.getIssuer();
         }
     }
+    @RequestMapping(value="/admin/addUser", method = RequestMethod.GET)
+    public ModelAndView getAddUserView(){
+        ModelAndView mav  = new ModelAndView("addUser");
+        return mav;
+    }
     @RequestMapping(value="/admin/addUser", method = RequestMethod.POST)
-    public void addUser(HttpServletResponse res,
+    public ModelAndView addUser(HttpServletResponse res,
             @ModelAttribute("addUserData") @Valid addUserData data,
             BindingResult result) throws JSONException, SQLException, IOException, NoSuchAlgorithmException, IOException{
         JSONObject json = new JSONObject();
         prepare();
+        ModelAndView mav = new ModelAndView("registerSuccessful");
         if(result.hasErrors()){
-            json.put(STATUS, ERROR);
-            json.put(MESSAGE, "Invalid input");
+            mav.addObject(STATUS, ERROR);
+            mav.addObject(MESSAGE, "Thông tin thiếu hoặc không hợp lệ");
+            
         }
         else{
             Member m = data.createNewMember(ijt.jdbcTemplate);
             data.createNewUser(ijt.jdbcTemplate,m);
-            json.put(STATUS, OK);
-            json.put(MESSAGE,"successful" );
+            mav.addObject(STATUS, OK);
+            mav.addObject(MESSAGE,"" );
+            mav.addObject("memberId", m.id);
+            
         }
-        res.getWriter().println(json.toString());
+        return mav;
     }
-    @RequestMapping(value="//admin/addService", method = RequestMethod.POST)
-    public void addService(HttpServletResponse res,
+    @RequestMapping(value="/admin/addService", method = RequestMethod.GET)
+    public ModelAndView getAddServiceView(){
+        return new ModelAndView("addService");
+    }
+    @RequestMapping(value="/admin/addService", method = RequestMethod.POST)
+    public ModelAndView addService(HttpServletResponse res,
             @ModelAttribute("addServiceData") @Valid addServiceData data,
             BindingResult result) throws JSONException, SQLException, IOException, NoSuchAlgorithmException{
         JSONObject json = new JSONObject();
         prepare();
+        ModelAndView mav =  new ModelAndView("registerSuccessful");
         if(result.hasErrors()){
-            json.put(STATUS, ERROR);
-            json.put(MESSAGE, "Invalid input");
+            mav.addObject(STATUS, ERROR);
+            mav.addObject(MESSAGE, "Thông tin không hợp lệ");
         }
         else{
-            data.createNewMember(ijt.jdbcTemplate);
+            Member m = data.createNewMember(ijt.jdbcTemplate);
             data.createNewService(ijt.jdbcTemplate);
-            json.put(STATUS, OK);
-            json.put(MESSAGE,"successful" );
+            mav.addObject(STATUS, OK);
+            mav.addObject(MESSAGE,"" );
+            mav.addObject("memberId",m.id );
         }
-        res.getWriter().println(json.toString());
+        return mav;
+    }
+    @RequestMapping(value="/admin/addApp", method = RequestMethod.GET)
+    public ModelAndView getAddAppView(){
+        return new ModelAndView("addApp");
     }
     @RequestMapping(value="/admin/addApp", method = RequestMethod.POST)
-    public void addApp(HttpServletResponse res,
+    public ModelAndView addApp(HttpServletResponse res,
             @ModelAttribute("addAppData") @Valid addAppData data,
             BindingResult result) throws JSONException, SQLException, IOException, NoSuchAlgorithmException{
         JSONObject json = new JSONObject();
         prepare();
+        ModelAndView mav = new ModelAndView("registerSuccessful");
         if(result.hasErrors()){
-            json.put(STATUS, ERROR);
-            json.put(MESSAGE, "Invalid input");
+            mav.addObject(STATUS, ERROR);
+            mav.addObject(MESSAGE, "Invalid input");
         }
         else{
             
             App app = data.createNewApp(ijt.jdbcTemplate);
             if(app != null){
-            json.put(STATUS, OK);
-            json.put(MESSAGE,"successful" );
+            mav.addObject(STATUS, OK);
+            mav.addObject(MESSAGE,"" );
+            mav.addObject("memberId",app.appID);
             }
             else{
-                 json.put(STATUS, ERROR);
-            json.put(MESSAGE, "Wrong identity");
+                 mav.addObject(STATUS, ERROR);
+            mav.addObject(MESSAGE, "Wrong identity");
             }
         }
-        res.getWriter().println(json.toString());
+        return mav;
     }
     @RequestMapping("/app")
     public void data (HttpServletResponse res,
@@ -153,6 +182,60 @@ public class AdminController {
             
         }
     }
+    @RequestMapping("/admin/")
+    public ModelAndView getAdminView(){
+        return new ModelAndView("admin/dashboard");
+    }
+    @RequestMapping("/admin/member")
+    public ModelAndView getListMemberView() throws SQLException, NoSuchAlgorithmException{
+        ModelAndView mav = new ModelAndView("admin/member");
+        prepare();
+        ArrayList<User> au = ijt.getALlUserMember();
+        if(au != null){
+            mav.addObject("allUser", au);
+        }
+        ArrayList<Service> al = ijt.getALlServiceMember();
+        if(al != null){
+            mav.addObject("allService", al);
+        }
+        return mav;
+        
+    }
+    @RequestMapping("/admin/level")
+    public ModelAndView getListLevelView() throws SQLException, NoSuchAlgorithmException{
+        ArrayList<Level> al = new ArrayList<Level>();
+        ArrayList<MemberType> am = new ArrayList<>();
+        prepare();
+        al = ijt.getAllLevel();
+        am = ijt.getAllMemberType();
+        ModelAndView mav = new ModelAndView("admin/level");
+        mav.addObject("allLevel", al);
+        mav.addObject("allType",am);
+        return mav;
+    }
+    @RequestMapping(value = "/admin/addType", method = RequestMethod.POST)
+    public void getAddTypeView(HttpServletResponse res,
+            @ModelAttribute("addMTypeData") @Valid addMTypeData data,
+            BindingResult result) throws JSONException, SQLException, IOException, NoSuchAlgorithmException{
+         JSONObject json = new JSONObject();
+         prepare();
+        if(result.hasErrors()){
+            json.put(STATUS, ERROR);
+            json.put(MESSAGE,"Invalid input");
+        }
+        else{
+            MemberType mtype = new MemberType(data.getPrefix());
+            mtype.save(ijt.jdbcTemplate);
+            json.put(STATUS , OK);
+            json.put(MESSAGE,"New MType : "+mtype.getPrefix() );
+            json.put("id",mtype.getId());
+            json.put("prefix",mtype.prefix);
+            
+        }
+        res.getWriter().println(json.toString());
+    }
+    
+    
     
     
 }
