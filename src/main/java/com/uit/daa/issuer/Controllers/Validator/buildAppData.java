@@ -79,7 +79,7 @@ public class buildAppData {
                 basenameWrtFields = Level.getSetBasenameWrtFields(j, MemberType.SERVICE_TYPE);
                 break;
         }
-        
+        memberInfo.getMember().type = member.type;
         String res = buildAppDataFromMemberInfo(memberInfo,sendablePremission,basenameWrtFields,issuer);
         
         //FIXME : encode data here
@@ -171,6 +171,7 @@ public class buildAppData {
         afb.setAppId(appId);
         afb.setCurve(curve.getName());
         afb.setIpk(issuer.pk.toJSON(curve));
+        afb.setMember_type(mi.getMember().getType());
         String r = afb.toJSON();
         return r;
         

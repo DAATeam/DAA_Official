@@ -87,6 +87,7 @@ public class Service extends MemberInfo {
             a.member.esk = rs.getBytes(C.CL_ESK);
             a.member.M = rs.getString(C.CL_M);
             a.id =id;
+            a.member.type = rs.getInt(C.CL_M_TYPE_ID);
             for(int i=0; i< User.fieldSet.length; i++){
                a.setInfo(User.fieldSet[i], rs.getString(User.fieldSet[i]));
             }
@@ -115,6 +116,7 @@ public class Service extends MemberInfo {
             a.member.esk = rs.getBytes(C.CL_ESK);
             a.member.M = rs.getString(C.CL_M);
             a.id =id;
+            a.member.type = rs.getInt(C.CL_M_TYPE_ID);
             Level l = new Level();
             l.getFromLevelID(j,rs.getInt(C.CL_SERVICE_LEVEL));
             String[] fs = Service.fieldSet;

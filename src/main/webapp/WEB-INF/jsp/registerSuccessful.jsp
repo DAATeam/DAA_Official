@@ -12,20 +12,18 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <spring:url value="/resources/css/bootstrap.min.css" var="mainCss"></spring:url>
-        <spring:url value = "/resources/js/bootstrap.min.js" var="mainJs"></spring:url>
-        <link href="${mainCss}" rel="stylesheet" />
-    
-        <script src="${mainJs}"></script> 
+        <jsp:include page="admin/defaultHeader.jsp"></jsp:include>
         <title>Đăng kí thành công </title>
     </head>
-    <body>
+        <body class="hold-transition skin-blue layout-top-nav">
+        <div class="wrapper">
         <p> ${msg} </p>
-        <div class =" container">
+        <div class ="container">
         <p class=""> Số ID : </p> <p>${memberId} </p>
         <a href="addUser">Thêm mới</a>
         <a href="member">Danh sách</a>
             
+        </div>
         </div>
         
     </body>

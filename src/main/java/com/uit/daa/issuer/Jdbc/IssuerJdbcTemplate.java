@@ -106,7 +106,7 @@ public class IssuerJdbcTemplate {
         if(!rs.next()){
         Table user  = new Table(C.TB_USER);
         user.addColumn(new Column().setToDefaultIdField());
-        user.addColumn(new Column(C.CL_NAME,Column.DataTypeEnum.TEXT,"name"));
+        user.addColumn(new Column(C.CL_NAME,Column.DataTypeEnum.TEXT,"Name"));
         user.addColumn(new Column(C.CL_JOB,Column.DataTypeEnum.TEXT,"job"));
         user.addColumn(new Column(C.CL_USER_ACCOUNT,Column.DataTypeEnum.TEXT,"bank account"));
         user.addColumn(new Column(C.CL_USER_DRIVE,Column.DataTypeEnum.TEXT,"expire date"));

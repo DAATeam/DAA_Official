@@ -9,22 +9,17 @@
 <!DOCTYPE html>
 <html>
     <head>
-       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <spring:url value="/resources/css/bootstrap.min.css" var="mainCss"></spring:url>
-        <spring:url value = "/resources/js/bootstrap.min.js" var="mainJs"></spring:url>
+        <jsp:include page="defaultHeader.jsp"></jsp:include>
         <spring:url value = "/resources/js/myjs.js" var="myJs"></spring:url>
-        <link href="${mainCss}" rel="stylesheet" />
-     <script type="text/JavaScript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js" ></script>
-     
-        <script src="${mainJs}"></script> 
+       
         <script src="${myJs}"></script> 
         
         <title>Danh sách phân quyền</title>
     </head>
-    <body>
-    <p class="h2">Danh sách các loại thành viên</p>
-        <button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#addTypeModal" >Thêm mới</button>
-                <!-- Modal -->
+    <body class="hold-transition skin-blue layout-top-nav">
+        
+        <div class="wrapper">
+              <!-- Modal -->
 <div id="addTypeModal" class="modal fade" role="dialog">
   <div class="modal-dialog">
 
@@ -52,25 +47,63 @@
 
     </div>
     </div>
-    
-        <table class="table-bordered">
-            <thead>ID</thead>
-            <thead>Prefix</thead>
-            <c:forEach items="${allType}" var="t">
+                <!-- end ò modal -->
+            <jsp:include page="navigator.jsp"></jsp:include>
+        
+            <!-- Table -->
+          <section class ="content">
+            <div class="row">
+         
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Các lọai thành viên</h3>
+                 <button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#addTypeModal" >Thêm mới</button>
+              
+            </div>
+          
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example2" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Loại</th>
+                    
+                </tr>
+                </thead>
+                 <c:forEach items="${allType}" var="t">
                 <tr> 
                     <td>${t.getId()}</td>
                     <td>${t.getPrefix()}</td>
                 </tr>
             </c:forEach>
-        </table>
-        <br>
-        
-        <table>
-            <thead>Phân quyền</thead>
-            <thead>Bên gửi</thead>
-            <thead>Bên nhận</thead>
-            <thead>Các nội dung</thead>
-            <c:forEach items="${allLevel}" var="level">
+            </table>
+            </div>
+          </div>
+        </div>
+      </div>
+              
+             <div class="row">
+         
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Danh sách phân quyền</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example2" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>Tên</th>
+                    <th>Bên gửi</th>
+                    <th>Bên nhận</th>
+                    <th>Các thông tin được đọc</th>
+                    
+                </tr>
+                </thead>
+                <c:forEach items="${allLevel}" var="level">
                 <tr>      
                     <td>${level.getLevel_name()}</td>
                     <td>${level.getMsender().getPrefix()}</td>
@@ -80,7 +113,15 @@
                     
                 </tr>
             </c:forEach>    
-             
-        </table>
-    </body>
+            </table>
+            </div>
+          </div>
+        </div>
+      </div>     
+
+</section> 
+</div>
+</body>
 </html>
+            
+    

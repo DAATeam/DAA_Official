@@ -11,14 +11,10 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <spring:url value="/resources/css/bootstrap.min.css" var="mainCss"></spring:url>
-        <spring:url value = "/resources/js/bootstrap.min.js" var="mainJs"></spring:url>
-        <link href="${mainCss}" rel="stylesheet" />
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-        <script src="${mainJs}"></script> 
+        <jsp:include page="admin/defaultHeader.jsp"></jsp:include>
         <title>Đăng kí thông tin </title>
     </head>
-    <body>
+        <body class="hold-transition skin-blue layout-top-nav">
         <h1></h1>
         <form class="form-horizontal" action ="" method = "POST">
 <fieldset>
@@ -168,5 +164,6 @@
 
 </fieldset>
 </form>
+       
     </body>
 </html>

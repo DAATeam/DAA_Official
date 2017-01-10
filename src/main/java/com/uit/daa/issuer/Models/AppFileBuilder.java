@@ -33,7 +33,7 @@ public class AppFileBuilder {
     private String esk;
     private String ipk;
     
-    
+    private Integer member_type;
     private String appId , curve;
     private BNCurve BNCurve = null;
     
@@ -44,9 +44,17 @@ public class AppFileBuilder {
     public final String MESSAGE = "message";
     public final String SIG = "sig";
     public final String CERT = "cert";
+
+    public Integer getMember_type() {
+        return member_type;
+    }
+
+    public void setMember_type(Integer member_type) {
+        this.member_type = member_type;
+    }
     
 
-   
+    
 
     public String getCurve() {
         return curve;
@@ -82,6 +90,7 @@ public class AppFileBuilder {
             json.put("curve", curve);
             //json.put("esk", esk);
             json.put("ipk",ipk);
+            json.put("member_type",member_type);
             for(AppFileField f : fields){
                 json = f.putToJSONObject(json);
             }

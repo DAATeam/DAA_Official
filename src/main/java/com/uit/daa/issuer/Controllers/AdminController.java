@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -182,6 +185,7 @@ public class AdminController {
             
         }
     }
+    
     @RequestMapping("/admin/")
     public ModelAndView getAdminView(){
         return new ModelAndView("admin/dashboard");
@@ -234,6 +238,26 @@ public class AdminController {
         }
         res.getWriter().println(json.toString());
     }
+    @RequestMapping(value="/admin/field",params = {"t"})
+    public @ResponseBody void getFieldOfTable(HttpServletResponse res,
+            @RequestParam(value = "t") String table) throws IOException, JSONException{
+        JSONObject json = new JSONObject();
+        JSONArray ja = new JSONArray();
+        if(table.equals("users")){
+            json.put("user_name","Họ Tên");
+            json.put("user_job","Nghe nghiep");
+            json.put("user_drive_expire","Thoi han giay phep");
+            json.put("user_account", "Tai khoan ngan hang");
+            
+        }
+        else if(table.equals("services")){
+            json.put("service_name","Ten dich vu");
+            json.put("service_account","Tai khoan ngan hang ");
+        }
+        res.getWriter().println(json.toString());
+    
+    }
+            
     
     
     

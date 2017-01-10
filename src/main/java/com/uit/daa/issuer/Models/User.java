@@ -109,6 +109,7 @@ public class User extends MemberInfo{
             a.member.esk = rs.getBytes(C.CL_ESK);
             a.member.M = rs.getString(C.CL_M);
             a.id =id;
+            a.member.type = rs.getInt(C.CL_M_TYPE_ID);
             String[] fs = User.fieldSet;
             for(int i=0; i< fs.length; i++){
                 String f = fs[i];

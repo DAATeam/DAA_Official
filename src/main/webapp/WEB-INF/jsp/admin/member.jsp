@@ -9,25 +9,34 @@
 <!DOCTYPE html>
 <html>
     <head>
-       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <spring:url value="/resources/css/bootstrap.min.css" var="mainCss"></spring:url>
-        <spring:url value = "/resources/js/bootstrap.min.js" var="mainJs"></spring:url>
-        <link href="${mainCss}" rel="stylesheet" />
-    
-        <script src="${mainJs}"></script> 
+        <jsp:include page="defaultHeader.jsp"></jsp:include>
         <title>Danh sách thành viên</title>
     </head>
-    <body>
-        <h2>Loại User</h2>
-        <a href = "addUser" class="btn btn-primary">Thêm User mới</a>
-        <br>
-        <table class="table-bordered">
-            <thead class="thead-default">MemberId</thead>
-            <thead class="thead-default">Tên</thead>
-            <thead class="thead-default">Nghề nghiệp</thead>
-            <thead class="thead-default">Thời hạn giấy phép</thead>
-            <thead class="thead-default">Tài khoản ngân hàng</thead>
-            <c:forEach items="${allUser}" var="user">
+    <body class="hold-transition skin-blue layout-top-nav">
+        <div class="wrapper">
+            <jsp:include page="navigator.jsp"></jsp:include>
+            <!-- Table -->
+             <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Thành viên loại User</h3>
+              <a class ="btn btn-success" href="addUser">Them User</a>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example2" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Tên</th>
+                    <th>Nghề nghiệp</th>
+                    <th>Thời hạn giấy phép</th>
+                    <th>Tài khoản</th>
+                </tr>
+                </thead>
+                 <c:forEach items="${allUser}" var="user">
                 <tr>      
                     <td>${user.getMember().getId()}</td>
                     <td>${user.getInfo("user_name")}</td>
@@ -37,15 +46,29 @@
                     
                 </tr>
             </c:forEach>    
-        </table>
-        <h2>Loại Service</h2>
-        <br>
-        <a href="addService" class="btn btn-primary" >Thêm Service mới</a>
-        <table class="table-bordered">
-            <thead class="thead-default">MemberId</thead>
-            <thead class="thead-default">Tên dịch vụ</thead>
-            <thead class="thead-default">Tài khoản ngân hàng</thead>
-            <c:forEach items="${allService}" var="service">
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+       <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Thành viên loại Service</h3>
+              <a class ="btn btn-success" href="addService">Them Service</a>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example2" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Tên dịch vụ</th>
+                    <th>Tài khoản ngân hàng</th>
+                </tr>
+                </thead>
+                  <c:forEach items="${allService}" var="service">
                 <tr>      
                     <td>${service.getMember().getId()}</td>
                     <td>${service.getInfo("service_name")}</td>
@@ -53,8 +76,19 @@
                     
                 </tr>
             </c:forEach>    
-        </table>
-        
+              </table>
+                
+            </div>
+          </div>
+        </div>
+                </div>
             
+            </div>
+          </div>       
+        </div>
+        </div>
+        </section>
+    </div>    
+
     </body>
 </html>
